@@ -100,3 +100,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+st.success("TENNIS ANALYTICS PRO: APP STARTUP COMPLETED")
+st.write("Current Page:", st.session_state.current_page)
+st.write("Theme:", st.session_state.theme)
