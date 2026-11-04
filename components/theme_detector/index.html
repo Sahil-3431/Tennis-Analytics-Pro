@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<script>
+    const mediaQuery = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+    );
+    function sendTheme() {
+        const theme = mediaQuery.matches ? "Dark" : "Light";
+        window.parent.postMessage(
+            {
+                isStreamlitMessage: true,
+                type: "streamlit:setComponentValue",
+                value: theme,
+                dataType: "json"
+            },
+            "*"
+        );
+    }
+    window.parent.postMessage(
+        {
+            isStreamlitMessage: true,
+            type: "streamlit:componentReady",
+            apiVersion: 1
+        },
+        "*"
+    );
+    mediaQuery.addEventListener("change", sendTheme);
+    sendTheme();
+</script>
+</body>
+</html>

@@ -1,7 +1,8 @@
 import streamlit as st
 
 def apply_theme():
-    theme = st.session_state.get("theme", "Dark")
+    theme = st.session_state.get("theme", "System")
+
     if theme == "Dark":
         background = "#0B1120"
         sidebar = "#111827"
@@ -461,6 +462,83 @@ def apply_theme():
 
         footer {{
             visibility: hidden;
+        }}
+
+        /* =========================================
+        FIXED THEME-AWARE STREAMLIT CONTROLS
+        ========================================= */
+
+        /* Selectbox and Multiselect main control */
+        [data-baseweb="select"] > div {{
+            background-color: INPUT_BG !important;
+            border: 1px solid BORDER_COLOR !important;
+            border-radius: 8px !important;
+            color: TEXT_COLOR !important;
+        }}
+
+        /* Selected value */
+        [data-baseweb="select"] span,
+        [data-baseweb="select"] input {{
+            color: TEXT_COLOR !important;
+            -webkit-text-fill-color: TEXT_COLOR !important;
+        }}
+
+        /* Dropdown arrow and icons */
+        [data-baseweb="select"] svg {{
+            fill: TEXT_COLOR !important;
+            color: TEXT_COLOR !important;
+        }}
+
+        /* Dropdown menu */
+        [data-baseweb="popover"],
+        [data-baseweb="menu"],
+        [data-baseweb="popover"] > div {{
+            background-color: CARD_BG !important;
+            border: 1px solid BORDER_COLOR !important;
+        }}
+
+        /* Dropdown options */
+        [role="listbox"] {{
+            background-color: CARD_BG !important;
+        }}
+        [role="option"] {{
+            background-color: CARD_BG !important;
+            color: TEXT_COLOR !important;
+        }}
+
+        /* Hover and selected option */
+        [role="option"]:hover,
+        [role="option"][aria-selected="true"] {{
+            background-color: INPUT_BG !important;
+            color: TEXT_COLOR !important;
+        }}
+
+        /* Text, number and textarea */
+        .stTextInput input,
+        .stTextArea textarea,
+        .stNumberInput input {{
+            background-color: INPUT_BG !important;
+            color: TEXT_COLOR !important;
+            border-color: BORDER_COLOR !important;
+        }}
+
+        /* Labels */
+        [data-testid="stWidgetLabel"] p {{
+            color: TEXT_COLOR !important;
+        }}
+
+        /* Buttons */
+        .stButton button,
+        .stDownloadButton button {{
+            background-color: CARD_BG !important;
+            color: TEXT_COLOR !important;
+            border: 1px solid BORDER_COLOR !important;
+        }}
+
+        /* Focus state */
+        [data-baseweb="select"] > div:focus-within {{
+            border-color: #38BDF8 !important;
+            box-shadow: 0 0 0 1px #38BDF8 !important;
         }}
         </style>
         """,

@@ -9,26 +9,8 @@ from dashboard import insights
 from dashboard import sql_analytics
 from dashboard import performance_analysis
 from dashboard import data_quality
-
-# ==========================================
-# SYSTEM THEME DETECTION
-# ==========================================
-
-def get_system_theme():
-    try:
-        import winreg
-        registry_key = winreg.OpenKey(
-            winreg.HKEY_CURRENT_USER,
-            r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
-        )
-        value, _ = winreg.QueryValueEx(
-            registry_key,
-            "AppsUseLightTheme"
-        )
-        winreg.CloseKey(registry_key)
-        return "Light" if value == 1 else "Dark"
-    except Exception:
-        return "Dark"
+from pathlib import Path
+import streamlit.components.v1 as components
 
 # ==========================================
 # PAGE CONFIGURATION
@@ -42,13 +24,41 @@ st.set_page_config(
 )
 
 # ==========================================
+# SYSTEM THEME DETECTION
+# ==========================================
+
+theme_detector = components.declare_component(
+    "theme_detector",
+    path=str(
+        Path(__file__).parent
+        / "components"
+        / "theme_detector"
+    )
+)
+
+# ==========================================
 # SESSION STATE
 # ==========================================
 
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "System"
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Executive Dashboard"
-if "theme" not in st.session_state:
-    st.session_state.theme = get_system_theme()
+
+# Get live browser / OS theme preference
+detected_theme = theme_detector(
+    default="Dark",
+    key="system_theme_detector"
+)
+if detected_theme not in ["Light", "Dark"]:
+    detected_theme = "Dark"
+st.session_state.system_theme = detected_theme
+
+# Apply manual or automatic theme
+if st.session_state.theme_mode == "System":
+    st.session_state.theme = detected_theme
+else:
+    st.session_state.theme = st.session_state.theme_mode
 
 # ==========================================
 # APPLY DESIGN

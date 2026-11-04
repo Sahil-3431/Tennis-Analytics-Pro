@@ -107,19 +107,27 @@ def render_sidebar():
             )
         st.markdown("---")
 
-        # THEME
+        # ==========================================
+        # THEME SELECTION
+        # ==========================================
+
         st.caption("APPEARANCE")
-        current_theme = st.session_state.get("theme","Dark")
-        theme_options = ["Dark", "Light"]
+        current_theme = st.session_state.get("theme_mode", "System")
+        theme_options = ["System", "Dark", "Light"]
         selected_theme = st.selectbox(
             "Select Theme",
             theme_options,
             index=theme_options.index(current_theme),
-            key="theme_selector"
+            key="theme_selector",
+            help="System automatically follows your device appearance preference."
         )
-
         if selected_theme != current_theme:
-            st.session_state.theme = selected_theme
+            st.session_state.theme_mode = selected_theme
+            if selected_theme == "System":
+                detected = st.session_state.get("system_theme", "Dark")
+                st.session_state.theme = detected
+            else:
+                st.session_state.theme = selected_theme
             st.rerun()
         st.markdown("---")
 
