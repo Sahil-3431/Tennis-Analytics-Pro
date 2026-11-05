@@ -8,13 +8,13 @@ def reset_global_filters():
 
 PAGES = {
     "Executive Dashboard": "📊",
+    "Data Quality": "🛡️",
     "Player Rankings": "🏆",
+    "Performance Analysis": "📈",
     "Competitor Explorer": "🔍",
     "Country Analytics": "🌍",
-    "Performance Analysis": "📈",
-    "Data Quality": "🛡️",
-    "Insights & Recommendations": "💡",
-    "SQL Analytics": "🗄️"
+    "SQL Analytics": "🗄️",
+    "Insights & Recommendations": "💡"
 }
 
 def render_sidebar():
@@ -32,6 +32,38 @@ def render_sidebar():
             unsafe_allow_html=True
         )
         st.markdown("---")
+
+        # ==========================================
+        # COLOR THEME SELECTION
+        # ==========================================
+
+        st.markdown(
+            """
+            <div class="sidebar-section-title">
+                <span>🎨</span> APPEARANCE SETTINGS
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        theme_options = [
+            "Ocean Blue",
+            "Pearl Light",
+            "Aurora Teal",
+            "Graphite Bronze",
+            "Slate Mono"
+        ]
+        if "color_theme" not in st.session_state:
+            st.session_state.color_theme = "Ocean Blue"
+        with st.container(border=True):
+            st.markdown("**Choose Your Theme**")
+            st.selectbox(
+                "Select Color Theme",
+                theme_options,
+                key="color_theme",
+                label_visibility="collapsed"
+            )
+            st.caption("Customize your Tennis Analytics Pro experience.")
+        st.markdown("---")
         st.caption("Page Navigation")
 
         # NAVIGATION
@@ -45,7 +77,8 @@ def render_sidebar():
             if st.button(
                 label,
                 key=f"nav_{page}",
-                use_container_width=True
+                use_container_width=True,
+                type="primary" if is_active else "secondary"
             ):
                 st.session_state.current_page = page
                 st.rerun()
@@ -55,7 +88,14 @@ def render_sidebar():
         # GLOBAL ANALYTICS FILTERS
         # ==========================================
 
-        st.caption("GLOBAL ANALYTICS FILTERS")
+        st.markdown(
+            """
+            <div class="sidebar-section-title">
+                <span>⚙️</span> GLOBAL ANALYTICS FILTERS
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         global_df = load_tennis_data()
         if not global_df.empty:
             ranking_options = ["All"] + sorted(
@@ -76,7 +116,6 @@ def render_sidebar():
                 .unique()
                 .tolist()
             )
-
             if "global_ranking" not in st.session_state:
                 st.session_state["global_ranking"] = "All"
             if "global_country" not in st.session_state:
@@ -84,53 +123,37 @@ def render_sidebar():
             if "global_gender" not in st.session_state:
                 st.session_state["global_gender"] = "All"
 
-            st.selectbox(
-                "Ranking Category",
-                ranking_options,
-                key="global_ranking"
-            )
-            st.selectbox(
-                "Country",
-                country_options,
-                key="global_country"
-            )
-            st.selectbox(
-                "Gender",
-                gender_options,
-                key="global_gender"
-            )
-            st.button(
-                "Reset Global Filters",
-                key="reset_global_filters",
-                on_click=reset_global_filters,
-                use_container_width=True
-            )
+            with st.container(border=True):
+                st.markdown("**🏆 Ranking Category**")
+                st.selectbox(
+                    "Ranking Category",
+                    ranking_options,
+                    key="global_ranking",
+                    label_visibility="collapsed"
+                )
+                st.markdown("**🌍 Country**")
+                st.selectbox(
+                    "Country",
+                    country_options,
+                    key="global_country",
+                    label_visibility="collapsed"
+                )
+                st.markdown("**👤 Gender**")
+                st.selectbox(
+                    "Gender",
+                    gender_options,
+                    key="global_gender",
+                    label_visibility="collapsed"
+                )
+                st.button(
+                    "↻ Reset Global Filters",
+                    key="reset_global_filters",
+                    on_click=reset_global_filters,
+                    use_container_width=True,
+                    type="secondary"
+                )
         st.markdown("---")
-
-        # ==========================================
-        # THEME SELECTION
-        # ==========================================
-
-        st.caption("APPEARANCE")
-        current_theme = st.session_state.get("theme_mode", "System")
-        theme_options = ["System", "Dark", "Light"]
-        selected_theme = st.selectbox(
-            "Select Theme",
-            theme_options,
-            index=theme_options.index(current_theme),
-            key="theme_selector",
-            help="System automatically follows your device appearance preference."
-        )
-        if selected_theme != current_theme:
-            st.session_state.theme_mode = selected_theme
-            if selected_theme == "System":
-                detected = st.session_state.get("system_theme", "Dark")
-                st.session_state.theme = detected
-            else:
-                st.session_state.theme = selected_theme
-            st.rerun()
-        st.markdown("---")
-
+        
         # FOOTER
         st.markdown(
             """

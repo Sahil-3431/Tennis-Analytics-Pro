@@ -1,30 +1,99 @@
 import streamlit as st
 
 def apply_theme():
-    theme = st.session_state.get("theme", "System")
-
-    if theme == "Dark":
-        background = "#0B1120"
-        sidebar = "#111827"
-        card = "#172033"
-        text = "#F8FAFC"
-        secondary = "#94A3B8"
-        border = "#263449"
-        input_bg = "#1E293B"
-
-    else:
-        background = "#F1F5F9"
-        sidebar = "#FFFFFF"
-        card = "#FFFFFF"
-        text = "#0F172A"
-        secondary = "#64748B"
-        border = "#E2E8F0"
-        input_bg = "#F8FAFC"
+    theme = st.session_state.get("color_theme","Ocean Blue")
+    THEMES = {
+        "Ocean Blue": {
+            "background": "#0B1929",
+            "sidebar": "#102438",
+            "card": "#142D43",
+            "text": "#F0F9FF",
+            "secondary": "#94B8CC",
+            "border": "#23445D",
+            "input_bg": "#19364F",
+            "accent": "#38BDF8",
+            "glow": "rgba(56, 189, 248, 0.15)",
+            "card_gradient": "linear-gradient(135deg, #142D43 0%, #193B55 100%)",
+            "hover_shadow": "0 10px 28px rgba(56, 189, 248, 0.22)",
+            "button_gradient": "linear-gradient(135deg, #0EA5E9 0%, #38BDF8 100%)"
+        },
+        "Pearl Light": {
+            "background": "#F4F7FB",
+            "sidebar": "#EAF0F7",
+            "card": "#FFFFFF",
+            "text": "#172B4D",
+            "secondary": "#64748B",
+            "border": "#DCE5F0",
+            "input_bg": "#FFFFFF",
+            "accent": "#2563EB",
+            "glow": "rgba(37, 99, 235, 0.10)",
+            "card_gradient": "linear-gradient(135deg, #FFFFFF 0%, #F1F6FD 100%)",
+            "hover_shadow": "0 10px 28px rgba(37, 99, 235, 0.14)",
+            "button_gradient": "linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)"
+        },
+        "Aurora Teal": {
+            "background": "#263B40",
+            "sidebar": "#30494D",
+            "card": "#3B5558",
+            "text": "#F0F7F5",
+            "secondary": "#B5CECA",
+            "border": "#587477",
+            "input_bg": "#456164",
+            "accent": "#65D6C2",
+            "glow": "rgba(101, 214, 194, 0.16)",
+            "card_gradient": "linear-gradient(135deg, #3B5558 0%, #49686A 100%)",
+            "hover_shadow": "0 10px 28px rgba(101, 214, 194, 0.20)",
+            "button_gradient": "linear-gradient(135deg, #238F83 0%, #65D6C2 100%)"
+        },
+        "Graphite Bronze": {
+            "background": "#393A3A",
+            "sidebar": "#454544",
+            "card": "#52514E",
+            "text": "#FAF7F0",
+            "secondary": "#D0C4AD",
+            "border": "#716B60",
+            "input_bg": "#5D5A54",
+            "accent": "#D6AE72",
+            "glow": "rgba(214, 174, 114, 0.16)",
+            "card_gradient": "linear-gradient(135deg, #52514E 0%, #625D53 100%)",
+            "hover_shadow": "0 10px 28px rgba(214, 174, 114, 0.20)",
+            "button_gradient": "linear-gradient(135deg, #A77A3E 0%, #D6AE72 100%)"
+        },
+        "Slate Mono": {
+            "background": "#15191F",
+            "sidebar": "#1D232B",
+            "card": "#252D37",
+            "text": "#F1F5F9",
+            "secondary": "#A1AAB5",
+            "border": "#3B4653",
+            "input_bg": "#303A46",
+            "accent": "#CBD5E1",
+            "glow": "rgba(203, 213, 225, 0.12)",
+            "card_gradient": "linear-gradient(135deg, #252D37 0%, #333F4C 100%)",
+            "hover_shadow": "0 10px 28px rgba(203, 213, 225, 0.16)",
+            "button_gradient": "linear-gradient(135deg, #475569 0%, #CBD5E1 100%)"
+        }
+    }
+    colors = THEMES.get(theme,THEMES["Ocean Blue"])
+    background = colors["background"]
+    sidebar = colors["sidebar"]
+    card = colors["card"]
+    text = colors["text"]
+    secondary = colors["secondary"]
+    border = colors["border"]
+    input_bg = colors["input_bg"]
+    accent = colors["accent"]
+    glow = colors["glow"]
+    card_gradient = colors["card_gradient"]
+    hover_shadow = colors["hover_shadow"]
+    button_gradient = colors["button_gradient"]
 
     st.markdown(
         f"""
         <style>
-        /* MAIN APPLICATION */
+        /* =========================================
+        MAIN APPLICATION
+        ========================================= */
 
         .stApp {{
             background-color: {background};
@@ -37,7 +106,9 @@ def apply_theme():
             background-color: transparent;
         }}
 
-        /* SIDEBAR */
+        /* =========================================
+        SIDEBAR
+        ========================================= */
 
         [data-testid="stSidebar"] {{
             background-color: {sidebar};
@@ -47,38 +118,525 @@ def apply_theme():
             color: {text};
         }}
 
-        /* MAIN CONTENT */
+        /* SIDEBAR NAVIGATION BUTTONS */
+
+        [data-testid="stSidebar"] .stButton > button {{
+            width: 100%;
+            text-align: left;
+            border-radius: 9px;
+            border: 1px solid {border} !important;
+            background: {card} !important;
+            color: {text} !important;
+            padding: 11px 13px;
+            min-height: 42px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.25s ease !important;
+            box-shadow: none !important;
+        }}
+        [data-testid="stSidebar"] .stButton > button:hover {{
+            border-color: {accent} !important;
+            background: {input_bg} !important;
+            color: {accent} !important;
+            transform: translateX(4px);
+            box-shadow: 0 4px 15px {glow} !important;
+        }}
+        [data-testid="stSidebar"] .stButton > button:focus-visible {{
+            border-color: {accent} !important;
+            box-shadow: 0 0 0 2px {glow} !important;
+        }}
+
+        /* =========================================
+        MAIN CONTENT
+        ========================================= */
 
         .block-container {{
             padding-top: 2rem;
             padding-bottom: 2rem;
             max-width: 1500px;
         }}
-
-        /* DASHBOARD LAYOUT POLISH */
-
         [data-testid="stVerticalBlock"] {{
             gap: 1rem;
         }}
         [data-testid="stHorizontalBlock"] {{
             gap: 1.2rem;
         }}
+
+        /* =========================================
+        HEADINGS AND TEXT
+        ========================================= */
+
+        h1, h2, h3 {{
+            color: {text} !important;
+        }}
+        p, label {{
+            color: {text};
+        }}
+        .main-header {{
+            font-size: 30px;
+            font-weight: 800;
+            color: {text};
+            letter-spacing: -0.8px;
+        }}
+        .main-subtitle {{
+            font-size: 14px;
+            color: {secondary};
+            margin-top: -10px;
+        }}
+
+        /* =========================================
+        BRANDING
+        ========================================= */
+
+        .brand-title {{
+            font-size: 25px;
+            font-weight: 850;
+            color: {accent};
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }}
+        .brand-subtitle {{
+            font-size: 10px;
+            font-weight: 600;
+            color: {secondary};
+            letter-spacing: 1.8px;
+        }}
+
+        /* =========================================
+        SIDEBAR SECTION HEADERS
+        ========================================= */
+
+        .sidebar-section-title {{
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: {accent};
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            padding: 8px 2px;
+            margin-bottom: 10px;
+        }}
+        .sidebar-section-title span {{
+            font-size: 15px;
+        }}
+
+        /* SIDEBAR FILTER AND THEME CONTAINERS */
+
+        [data-testid="stSidebar"] [data-testid="stVerticalBlockBorderWrapper"] {{
+            background: {card_gradient};
+            border: 1px solid {border};
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 14px {glow};
+        }}
+        [data-testid="stSidebar"] [data-testid="stVerticalBlockBorderWrapper"] p {{
+            color: {text} !important;
+            font-weight: 600;
+        }}
+
+        /* =========================================
+        PREMIUM KPI CARDS
+        ========================================= */
+
+        .kpi-card {{
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 145px;
+            height: auto;
+            padding: 18px 20px;
+            margin-bottom: 0;
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0;
+            background:
+                radial-gradient(
+                    circle at 100% 0%,
+                    {glow},
+                    transparent 48%
+                ),
+                {card_gradient};
+            border: 1px solid {border};
+            border-radius: 17px;
+            box-shadow:
+                0 5px 16px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.035);
+            transition:
+                transform 0.28s ease,
+                box-shadow 0.28s ease,
+                border-color 0.28s ease;
+        }}
+
+        /* Accent strip */
+
+        .kpi-card::before {{
+            content: "";
+            position: absolute;
+            top: 18px;
+            bottom: 18px;
+            left: 0;
+            width: 4px;
+            background: {accent};
+            border-radius: 0 5px 5px 0;
+            box-shadow: 0 0 13px {glow};
+        }}
+
+        /* Decorative background glow */
+
+        .kpi-card::after {{
+            content: "";
+            position: absolute;
+            width: 125px;
+            height: 125px;
+            right: -48px;
+            top: -55px;
+            background: {accent};
+            opacity: 0.055;
+            border-radius: 50%;
+            filter: blur(3px);
+            pointer-events: none;
+        }}
+
+        .kpi-card:hover {{
+            transform: translateY(-5px);
+            border-color: {accent};
+            box-shadow:
+                {hover_shadow},
+                0 8px 22px rgba(0, 0, 0, 0.12);
+        }}
+
+        /* KPI LABEL */
+
+        .kpi-label {{
+            position: relative;
+            z-index: 1;
+            color: {secondary};
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 0.7px;
+            line-height: 1.5;
+            text-transform: uppercase;
+        }}
+
+        /* KPI VALUE */
+
+        .kpi-value {{
+            position: relative;
+            z-index: 1;
+            color: {text};
+            font-size: 28px;
+            font-weight: 850;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-top: 9px;
+            overflow-wrap: anywhere;
+        }}
+
+        /* KPI DESCRIPTION */
+
+        .kpi-caption {{
+            position: relative;
+            z-index: 1;
+            color: {secondary};
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-top: 7px;
+        }}
+
+        /* RESPONSIVE KPI CARDS */
+
+        @media (max-width: 768px) {{
+            .kpi-card {{
+                min-height: 145px;
+                padding: 20px;
+                margin-bottom: 14px;
+            }}
+            .kpi-value {{
+                font-size: 27px;
+            }}
+            .kpi-label {{
+                font-size: 11px;
+            }}
+            .kpi-caption {{
+                font-size: 11px;
+            }}
+        }}
+
+        /* =========================================
+        SECTION HEADERS
+        ========================================= */
+
+        .section-header {{
+            margin-top: 14px;
+            margin-bottom: 12px;
+            padding: 15px 20px;
+            border-left: 4px solid {accent};
+            border-radius: 8px;
+            background: {card};
+        }}
+        .section-header h3 {{
+            font-size: 20px;
+            font-weight: 750;
+            margin: 0;
+            color: {text} !important;
+        }}
+        .section-header p {{
+            font-size: 12px;
+            margin: 5px 0 0 0;
+            color: {secondary};
+        }}
+
+        /* =========================================
+        CHART CONTAINERS
+        ========================================= */
+
         [data-testid="stPlotlyChart"] {{
+            background: {card};
+            border-radius: 12px;
+            padding: 5px;
             margin-top: 8px;
             margin-bottom: 12px;
         }}
-        [data-testid="stDataFrame"] {{
+
+        /* =========================================
+        DATAFRAME STYLING
+        ========================================= */
+
+        [data-testid="stDataFrame"],
+        [data-testid="stDataEditor"] {{
+            background-color: {card} !important;
+            border: 1px solid {border} !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
             margin-top: 8px;
             margin-bottom: 14px;
         }}
-
-        /* CONTAINER BORDER AND SPACING */
-
-        [data-testid="stVerticalBlockBorderWrapper"] {{
-            border-radius: 12px;
+        [data-testid="stDataFrame"] > div,
+        [data-testid="stDataEditor"] > div {{
+            background-color: {card} !important;
+            border-radius: 12px !important;
+        }}
+        [data-testid="stDataFrame"] [data-testid="stElementToolbar"],
+        [data-testid="stDataEditor"] [data-testid="stElementToolbar"] {{
+            background-color: {card} !important;
+            border-color: {border} !important;
         }}
 
-        /* RESPONSIVE CONTENT */
+        /* =========================================
+        EXPANDER STYLING
+        ========================================= */
+
+        [data-testid="stExpander"] {{
+            background-color: {card} !important;
+            border: 1px solid {border} !important;
+            border-radius: 10px !important;
+            overflow: hidden !important;
+            margin-bottom: 10px;
+        }}
+        [data-testid="stExpander"] summary {{
+            background-color: {card} !important;
+            color: {text} !important;
+            padding: 12px 16px !important;
+            font-weight: 600 !important;
+        }}
+        [data-testid="stExpander"] summary:hover {{
+            background-color: {input_bg} !important;
+        }}
+        [data-testid="stExpander"] summary p,
+        [data-testid="stExpander"] summary span {{
+            color: {text} !important;
+        }}
+        [data-testid="stExpander"] [data-testid="stExpanderDetails"] {{
+            background-color: {card} !important;
+            border-top: 1px solid {border} !important;
+            padding: 14px 16px !important;
+        }}
+        [data-testid="stExpander"] [data-testid="stExpanderDetails"] p,
+        [data-testid="stExpander"] [data-testid="stExpanderDetails"] label {{
+            color: {text} !important;
+        }}
+
+        /* =========================================
+        GLOBAL BUTTONS
+        ========================================= */
+
+        .stButton > button,
+        .stDownloadButton > button,
+        .stFormSubmitButton > button {{
+            background: {button_gradient} !important;
+            color: #FFFFFF !important;
+            border: 1px solid {accent} !important;
+            border-radius: 9px !important;
+            font-weight: 600;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 14px {glow} !important;
+        }}
+        .stButton > button:hover,
+        .stDownloadButton > button:hover,
+        .stFormSubmitButton > button:hover {{
+            background: {button_gradient} !important;
+            color: #FFFFFF !important;
+            border-color: {accent} !important;
+            transform: translateY(-2px);
+            box-shadow: {hover_shadow} !important;
+            filter: brightness(1.08);
+        }}
+
+        /* SIDEBAR BUTTON OVERRIDE */
+        /* Keep sidebar buttons independent from global buttons */
+
+        [data-testid="stSidebar"] .stButton > button {{
+            background: {card} !important;
+            color: {text} !important;
+            box-shadow: none !important;
+        }}
+        [data-testid="stSidebar"] .stButton > button:hover {{
+            background: {input_bg} !important;
+            color: {accent} !important;
+            box-shadow: 0 4px 15px {glow} !important;
+        }}
+
+        /* =========================================
+        ACTIVE SIDEBAR NAVIGATION
+        ========================================= */
+
+        [data-testid="stSidebar"] .stButton > button[kind="primary"] {{
+            background: {button_gradient} !important;
+            color: #FFFFFF !important;
+            border: 1px solid {accent} !important;
+            border-left: 4px solid {accent} !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 18px {glow} !important;
+            transform: translateX(3px);
+        }}
+        [data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {{
+            background: {button_gradient} !important;
+            color: #FFFFFF !important;
+            border-color: {accent} !important;
+            box-shadow: {hover_shadow} !important;
+            filter: brightness(1.12);
+            transform: translateX(5px);
+        }}
+        [data-testid="stSidebar"] .stButton > button[kind="secondary"] {{
+            background: {card} !important;
+            color: {text} !important;
+        }}
+
+        /* =========================================
+        INPUTS AND TEXTAREA
+        ========================================= */
+
+        .stTextInput input,
+        .stTextArea textarea,
+        .stNumberInput input {{
+            background-color: {input_bg} !important;
+            color: {text} !important;
+            border: 1px solid {border} !important;
+            border-radius: 8px !important;
+        }}
+        .stTextInput input::placeholder,
+        .stTextArea textarea::placeholder,
+        .stNumberInput input::placeholder {{
+            color: {secondary} !important;
+        }}
+
+        /* =========================================
+        SELECTBOX AND MULTISELECT
+        ========================================= */
+
+        [data-baseweb="select"] > div {{
+            background-color: {input_bg} !important;
+            border: 1px solid {border} !important;
+            border-radius: 8px !important;
+            color: {text} !important;
+        }}
+        [data-baseweb="select"] span,
+        [data-baseweb="select"] input {{
+            color: {text} !important;
+            -webkit-text-fill-color: {text} !important;
+        }}
+        [data-baseweb="select"] svg {{
+            fill: {text} !important;
+            color: {text} !important;
+        }}
+        [data-baseweb="select"] > div:focus-within {{
+            border-color: {accent} !important;
+            box-shadow: 0 0 0 1px {accent} !important;
+        }}
+
+        /* DROPDOWN OPTIONS */
+
+        [data-baseweb="popover"],
+        [data-baseweb="menu"],
+        [role="listbox"] {{
+            background-color: {card} !important;
+        }}
+        [role="option"] {{
+            background-color: {card} !important;
+            color: {text} !important;
+        }}
+        [role="option"]:hover,
+        [role="option"][aria-selected="true"] {{
+            background-color: {input_bg} !important;
+            color: {text} !important;
+        }}
+
+        /* =========================================
+        TABS
+        ========================================= */
+
+        .stTabs [data-baseweb="tab"] {{
+            color: {secondary} !important;
+        }}
+        .stTabs [aria-selected="true"] {{
+            color: {accent} !important;
+        }}
+
+        /* =========================================
+        RADIO AND CHECKBOX
+        ========================================= */
+
+        .stRadio label,
+        .stCheckbox label {{
+            color: {text} !important;
+        }}
+        [data-testid="stWidgetLabel"] p {{
+            color: {text} !important;
+        }}
+
+        /* =========================================
+        DIVIDERS AND FOOTER
+        ========================================= */
+
+        hr {{
+            border-color: {border};
+        }}
+        .dashboard-footer {{
+            color: {secondary};
+            font-size: 12px;
+            text-align: center;
+            padding: 22px 12px;
+            margin-top: 25px;
+            border-top: 1px solid {border};
+            line-height: 1.8;
+            letter-spacing: 0.3px;
+        }}
+        .dashboard-footer strong {{
+            color: {text};
+            font-weight: 700;
+        }}
+        footer {{
+            visibility: hidden;
+        }}
+
+        /* =========================================
+        RESPONSIVE CONTENT
+        ========================================= */
 
         @media (max-width: 768px) {{
             .block-container {{
@@ -94,451 +652,6 @@ def apply_theme():
             .section-header h3 {{
                 font-size: 17px;
             }}
-        }}
-
-        /* HEADINGS */
-
-        h1, h2, h3 {{
-            color: {text} !important;
-        }}
-        p, label {{
-            color: {text};
-        }}
-
-        /* HEADER */
-
-        .main-header {{
-            font-size: 30px;
-            font-weight: 800;
-            color: {text};
-            letter-spacing: -0.8px;
-        }}
-        .main-subtitle {{
-            font-size: 14px;
-            color: {secondary};
-            margin-top: -10px;
-        }}
-
-        /* BRAND */
-
-        .brand-title {{
-            font-size: 25px;
-            font-weight: 850;
-            color: #38BDF8;
-            letter-spacing: 0.5px;
-            margin-bottom: 3px;
-        }}
-        .brand-subtitle {{
-            font-size: 10px;
-            font-weight: 600;
-            color: {secondary};
-            letter-spacing: 1.8px;
-        }}
-
-        /* KPI CARDS */
-
-        .kpi-card {{
-            background: {card};
-            border: 1px solid {border};
-            border-radius: 14px;
-            padding: 20px;
-            min-height: 125px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.25s ease,
-                        border-color 0.25s ease,
-                        box-shadow 0.25s ease;
-        }}
-        .kpi-card:hover {{
-            transform: translateY(-4px);
-            border-color: #38BDF8;
-            box-shadow: 0 8px 22px rgba(56, 189, 248, 0.12);
-        }}
-        .kpi-label {{
-            color: {secondary};
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }}
-        .kpi-value {{
-            color: {text};
-            font-size: 28px;
-            font-weight: 800;
-            margin-top: 10px;
-            line-height: 1.3;
-            word-break: break-word;
-        }}
-        .kpi-caption {{
-            color: {secondary};
-            font-size: 11px;
-            margin-top: 5px;
-            line-height: 1.5;
-        }}
-
-        /* SECTION HEADERS */
-
-        .section-header {{
-            margin-top: 18px;
-            margin-bottom: 18px;
-            padding: 12px 16px;
-            border-left: 4px solid #38BDF8;
-            border-radius: 8px;
-            background-color: {card};
-        }}
-        .section-header h3 {{
-            font-size: 20px;
-            font-weight: 750;
-            margin: 0;
-            color: {text} !important;
-        }}
-        .section-header p {{
-            font-size: 12px;
-            margin: 5px 0 0 0;
-            color: {secondary};
-        }}
-
-        /* SIDEBAR NAVIGATION BUTTONS */
-
-        [data-testid="stSidebar"] .stButton button {{
-            width: 100%;
-            text-align: left;
-            border-radius: 9px;
-            border: 1px solid {border};
-            background: {card};
-            color: {text};
-            padding: 11px 13px;
-            min-height: 42px;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }}
-        [data-testid="stSidebar"] .stButton button:hover {{
-            border-color: #38BDF8;
-            background: {input_bg};
-            color: #38BDF8;
-            transform: translateX(3px);
-        }}
-        [data-testid="stSidebar"] .stButton button:focus {{
-            border-color: #38BDF8;
-            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
-        }}
-
-        /* SIDEBAR BRANDING */
-
-        .brand-title {{
-            font-size: 25px;
-            font-weight: 850;
-            letter-spacing: 0.5px;
-            color: #38BDF8;
-            margin-bottom: 3px;
-        }}
-        .brand-subtitle {{
-            font-size: 10px;
-            font-weight: 600;
-            color: {secondary};
-            letter-spacing: 1.8px;
-        }}
-
-        /* INPUTS */
-
-        .stTextInput input,
-        .stSelectbox div[data-baseweb="select"] {{
-            background-color: {input_bg};
-            color: {text};
-            border-radius: 8px;
-        }}
-
-        /* DIVIDER */
-
-        hr {{
-            border-color: {border};
-        }}
-
-        /* DATAFRAME */
-
-        [data-testid="stDataFrame"] {{
-            border: 1px solid {border};
-            border-radius: 10px;
-        }}
-
-        /* CHART CONTAINER */
-
-        [data-testid="stPlotlyChart"] {{
-            background: {card};
-            border-radius: 12px;
-            padding: 5px;
-        }}
-
-        /* SECTION HEADERS */
-
-        .section-header {{
-            margin-top: 18px;
-            margin-bottom: 18px;
-            padding: 12px 16px;
-            border-left: 4px solid #38BDF8;
-            border-radius: 8px;
-            background-color: {card};
-        }}
-        .section-header h3 {{
-            font-size: 20px;
-            font-weight: 750;
-            margin: 0;
-            color: {text} !important;
-        }}
-        .section-header p {{
-            font-size: 12px;
-            margin: 5px 0 0 0;
-            color: {secondary};
-        }}
-
-        /* DASHBOARD FOOTER */
-
-        .dashboard-footer {{
-            color: {secondary};
-            font-size: 12px;
-            text-align: center;
-            padding: 22px 12px;
-            margin-top: 25px;
-            border-top: 1px solid {border};
-            line-height: 1.8;
-            letter-spacing: 0.3px;
-        }}
-        .dashboard-footer strong {{
-            color: {text};
-            font-weight: 700;
-        }}
-
-        
-        /* =========================================
-        GLOBAL DATAFRAME STYLING
-        ========================================= */
-
-        /* DATAFRAME CONTAINER */
-        [data-testid="stDataFrame"],
-        [data-testid="stDataEditor"] {{
-            background-color: {card} !important;
-            border: 1px solid {border} !important;
-            border-radius: 12px !important;
-            overflow: hidden !important;
-        }}
-
-        /* DATAFRAME TOOLBAR */
-        [data-testid="stDataFrame"] [data-testid="stElementToolbar"],
-        [data-testid="stDataEditor"] [data-testid="stElementToolbar"] {{
-            background-color: {card} !important;
-            border-color: {border} !important;
-        }}
-
-        /* DATAFRAME SURROUNDING AREA */
-        [data-testid="stDataFrame"] > div,
-        [data-testid="stDataEditor"] > div {{
-            background-color: {card} !important;
-            border-radius: 12px !important;
-        }}
-
-        /* =========================================
-        GLOBAL EXPANDER STYLING
-        ========================================= */
-
-        /* EXPANDER MAIN CONTAINER */
-        [data-testid="stExpander"] {{
-            background-color: {card} !important;
-            border: 1px solid {border} !important;
-            border-radius: 10px !important;
-            overflow: hidden !important;
-            margin-bottom: 10px;
-        }}
-
-        /* EXPANDER HEADER */
-        [data-testid="stExpander"] summary {{
-            background-color: {card} !important;
-            color: {text} !important;
-            padding: 12px 16px !important;
-            font-weight: 600 !important;
-        }}
-
-        /* EXPANDER HEADER HOVER */
-        [data-testid="stExpander"] summary:hover {{
-            background-color: {input_bg} !important;
-        }}
-
-        /* EXPANDER HEADER TEXT */
-        [data-testid="stExpander"] summary p,
-        [data-testid="stExpander"] summary span {{
-            color: {text} !important;
-        }}
-
-        /* EXPANDER CONTENT */
-        [data-testid="stExpander"] [data-testid="stExpanderDetails"] {{
-            background-color: {card} !important;
-            border-top: 1px solid {border} !important;
-            padding: 14px 16px !important;
-        }}
-
-        /* EXPANDER CONTENT TEXT */
-        [data-testid="stExpander"] [data-testid="stExpanderDetails"] p,
-        [data-testid="stExpander"] [data-testid="stExpanderDetails"] label {{
-            color: {text} !important;
-        }}
-
-        /* GLOBAL THEME-AWARE CONTROLS */
-
-        /* ALL BUTTONS */
-        .stButton > button,
-        .stDownloadButton > button,
-        .stFormSubmitButton > button {{
-            background-color: {card};
-            color: {text};
-            border: 1px solid {border};
-            border-radius: 9px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }}
-        .stButton > button:hover,
-        .stDownloadButton > button:hover,
-        .stFormSubmitButton > button:hover {{
-            background-color: {input_bg};
-            color: #38BDF8;
-            border-color: #38BDF8;
-        }}
-
-        /* TEXT INPUTS AND TEXTAREA */
-        .stTextInput input,
-        .stTextArea textarea,
-        .stNumberInput input {{
-            background-color: {input_bg} !important;
-            color: {text} !important;
-            border: 1px solid {border} !important;
-            border-radius: 8px !important;
-        }}
-
-        /* SELECTBOX AND MULTISELECT */
-        [data-baseweb="select"] > div {{
-            background-color: {input_bg} !important;
-            color: {text} !important;
-            border-color: {border} !important;
-        }}
-
-        /* DROPDOWN OPTIONS */
-        [data-baseweb="popover"],
-        [data-baseweb="menu"],
-        [role="listbox"] {{
-            background-color: {card} !important;
-        }}
-        [role="option"] {{
-            background-color: {card} !important;
-            color: {text} !important;
-        }}
-        [role="option"]:hover {{
-            background-color: {input_bg} !important;
-        }}
-
-        /* TABS */
-        .stTabs [data-baseweb="tab"] {{
-            color: {secondary} !important;
-        }}
-        .stTabs [aria-selected="true"] {{
-            color: #38BDF8 !important;
-        }}
-
-        /* RADIO AND CHECKBOX */
-        .stRadio label,
-        .stCheckbox label {{
-            color: {text} !important;
-        }}
-
-        /* PLACEHOLDERS */
-        .stTextInput input::placeholder,
-        .stTextArea textarea::placeholder,
-        .stNumberInput input::placeholder {{
-            color: {secondary} !important;
-        }}
-
-        /* HIDE DEFAULT STREAMLIT FOOTER */
-
-        footer {{
-            visibility: hidden;
-        }}
-
-        /* =========================================
-        FIXED THEME-AWARE STREAMLIT CONTROLS
-        ========================================= */
-
-        /* Selectbox and Multiselect main control */
-        [data-baseweb="select"] > div {{
-            background-color: INPUT_BG !important;
-            border: 1px solid BORDER_COLOR !important;
-            border-radius: 8px !important;
-            color: TEXT_COLOR !important;
-        }}
-
-        /* Selected value */
-        [data-baseweb="select"] span,
-        [data-baseweb="select"] input {{
-            color: TEXT_COLOR !important;
-            -webkit-text-fill-color: TEXT_COLOR !important;
-        }}
-
-        /* Dropdown arrow and icons */
-        [data-baseweb="select"] svg {{
-            fill: TEXT_COLOR !important;
-            color: TEXT_COLOR !important;
-        }}
-
-        /* Dropdown menu */
-        [data-baseweb="popover"],
-        [data-baseweb="menu"],
-        [data-baseweb="popover"] > div {{
-            background-color: CARD_BG !important;
-            border: 1px solid BORDER_COLOR !important;
-        }}
-
-        /* Dropdown options */
-        [role="listbox"] {{
-            background-color: CARD_BG !important;
-        }}
-        [role="option"] {{
-            background-color: CARD_BG !important;
-            color: TEXT_COLOR !important;
-        }}
-
-        /* Hover and selected option */
-        [role="option"]:hover,
-        [role="option"][aria-selected="true"] {{
-            background-color: INPUT_BG !important;
-            color: TEXT_COLOR !important;
-        }}
-
-        /* Text, number and textarea */
-        .stTextInput input,
-        .stTextArea textarea,
-        .stNumberInput input {{
-            background-color: INPUT_BG !important;
-            color: TEXT_COLOR !important;
-            border-color: BORDER_COLOR !important;
-        }}
-
-        /* Labels */
-        [data-testid="stWidgetLabel"] p {{
-            color: TEXT_COLOR !important;
-        }}
-
-        /* Buttons */
-        .stButton button,
-        .stDownloadButton button {{
-            background-color: CARD_BG !important;
-            color: TEXT_COLOR !important;
-            border: 1px solid BORDER_COLOR !important;
-        }}
-
-        /* Focus state */
-        [data-baseweb="select"] > div:focus-within {{
-            border-color: #38BDF8 !important;
-            box-shadow: 0 0 0 1px #38BDF8 !important;
         }}
         </style>
         """,
@@ -575,98 +688,161 @@ def render_section_header(title, subtitle=None, icon=None):
         unsafe_allow_html=True
     )
 
-
 def apply_chart_theme(fig):
     """
-    Apply consistent Light/Dark theme to Plotly charts.
+    Apply active color theme to Plotly charts.
     """
-    theme = st.session_state.get("theme", "Dark")
-
-    if theme == "Light":
-        background = "#FFFFFF"
-        text_color = "#0F172A"
-        grid_color = "#E2E8F0"
-        axis_color = "#334155"
-    else:
-        background = "#0B1120"
-        text_color = "#F8FAFC"
-        grid_color = "#263449"
-        axis_color = "#CBD5E1"
-
+    theme = st.session_state.get("color_theme","Ocean Blue")
+    chart_themes = {
+        "Ocean Blue": {
+            "background": "#142D43",
+            "text": "#F0F9FF",
+            "grid": "#23445D",
+            "accent": "#38BDF8",
+            "palette": ["#38BDF8", "#0EA5E9", "#7DD3FC", "#2563EB", "#A5F3FC"],
+        },
+        "Pearl Light": {
+            "background": "#FFFFFF",
+            "text": "#172B4D",
+            "grid": "#E2E8F0",
+            "accent": "#2563EB",
+            "palette": ["#2563EB","#0EA5E9","#10B981","#F59E0B","#8B5CF6","#EC4899"],
+        },
+        "Aurora Teal": {
+            "background": "#3B5558",
+            "text": "#F0F7F5",
+            "grid": "#587477",
+            "accent": "#65D6C2",
+            "palette": ["#65D6C2","#38B2AC","#A7E3D8","#4F9DA6","#B8D8C8"],
+        },
+        "Graphite Bronze": {
+            "background": "#52514E",
+            "text": "#FAF7F0",
+            "grid": "#716B60",
+            "accent": "#D6AE72",
+            "palette": ["#D6AE72","#C18E55","#E8C99A","#AFA18A","#F0D9B5"],
+        },
+        "Slate Mono": {
+            "background": "#252D37",
+            "text": "#F1F5F9",
+            "grid": "#3B4653",
+            "accent": "#CBD5E1",
+            "palette": ["#CBD5E1", "#94A3B8", "#E2E8F0", "#64748B", "#F8FAFC"],
+        }
+    }
+    colors = chart_themes.get(theme,chart_themes["Ocean Blue"])
     fig.update_layout(
-        template="plotly_white" if theme == "Light" else "plotly_dark",
-        paper_bgcolor=background,
-        plot_bgcolor=background,
+        template="plotly_white" if theme == "Pearl Light" else "plotly_dark",
+        paper_bgcolor=colors["background"],
+        plot_bgcolor=colors["background"],
+        colorway=colors["palette"],
         font=dict(
-            color=text_color,
+            color=colors["text"],
             family="Arial"
         ),
         title_font=dict(
-            color=text_color
+            color=colors["text"]
         ),
         legend=dict(
-            font=dict(color=text_color),
-            title_font=dict(color=text_color)
+            font=dict(color=colors["text"]),
+            title_font=dict(color=colors["text"])
         ),
+        hoverlabel=dict(
+            bgcolor=colors["background"],
+            bordercolor=colors["accent"],
+            font=dict(
+                color=colors["text"],
+                family="Arial",
+                size=13
+            )
+        ),
+        transition=dict(
+            duration=500,
+            easing="cubic-in-out"
+        ),
+        hovermode="closest",
         xaxis=dict(
-            color=axis_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            gridcolor=grid_color,
-            linecolor=grid_color,
-            zerolinecolor=grid_color
+            color=colors["text"],
+            title_font=dict(color=colors["text"]),
+            tickfont=dict(color=colors["text"]),
+            gridcolor=colors["grid"],
+            linecolor=colors["grid"],
+            zerolinecolor=colors["grid"]
         ),
         yaxis=dict(
-            color=axis_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            gridcolor=grid_color,
-            linecolor=grid_color,
-            zerolinecolor=grid_color
+            color=colors["text"],
+            title_font=dict(color=colors["text"]),
+            tickfont=dict(color=colors["text"]),
+            gridcolor=colors["grid"],
+            linecolor=colors["grid"],
+            zerolinecolor=colors["grid"]
         )
     )
     return fig
 
 def render_dataframe(df, **kwargs):
     """
-    Render a DataFrame with the active Light/Dark theme.
+    Render DataFrame using the active color theme.
     """
-    theme = st.session_state.get("theme", "Dark")
-    if theme == "Light":
-        background = "#FFFFFF"
-        text_color = "#0F172A"
-        header_background = "#E2E8F0"
-        border_color = "#CBD5E1"
-    else:
-        background = "#172033"
-        text_color = "#F8FAFC"
-        header_background = "#1E293B"
-        border_color = "#334155"
+    theme = st.session_state.get("color_theme","Ocean Blue")
+    table_themes = {
+        "Ocean Blue": {
+            "background": "#142D43",
+            "text": "#F0F9FF",
+            "header": "#19364F",
+            "border": "#23445D"
+        },
+        "Pearl Light": {
+            "background": "#FFFFFF",
+            "text": "#172B4D",
+            "header": "#EAF0F7",
+            "border": "#DCE5F0"
+        },
+        "Aurora Teal": {
+            "background": "#3B5558",
+            "text": "#F0F7F5",
+            "header": "#456164",
+            "border": "#587477"
+        },
+        "Graphite Bronze": {
+            "background": "#52514E",
+            "text": "#FAF7F0",
+            "header": "#5D5A54",
+            "border": "#716B60"
+        },
+        "Slate Mono": {
+            "background": "#252D37",
+            "text": "#F1F5F9",
+            "header": "#303A46",
+            "border": "#3B4653"
+        }
+    }
+    colors = table_themes.get(theme,table_themes["Ocean Blue"])
     styled_df = (
         df.style
         .set_properties(
             **{
-                "background-color": background,
-                "color": text_color,
-                "border-color": border_color,
+                "background-color": colors["background"],
+                "color": colors["text"],
+                "border-color": colors["border"]
             }
         )
         .set_table_styles([
             {
                 "selector": "th",
                 "props": [
-                    ("background-color", header_background),
-                    ("color", text_color),
-                    ("border-color", border_color),
-                    ("font-weight", "bold"),
-                ],
+                    ("background-color", colors["header"]),
+                    ("color", colors["text"]),
+                    ("border-color", colors["border"]),
+                    ("font-weight", "bold")
+                ]
             },
             {
                 "selector": "td",
                 "props": [
-                    ("border-color", border_color),
-                ],
-            },
+                    ("border-color", colors["border"])
+                ]
+            }
         ])
     )
     kwargs.setdefault("use_container_width", True)

@@ -6,7 +6,8 @@ from utils.global_filters import apply_global_filters
 from utils.styling import (
     render_section_header,
     apply_chart_theme,
-    render_dataframe
+    render_dataframe,
+    render_kpi
 )
 
 @st.cache_data
@@ -216,32 +217,32 @@ def show():
         "Overview of important metrics for the selected dataset.",
         "📊"
     )
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4, gap="large")
     with col1:
-        st.metric(
+        render_kpi(
             "Total Players",
-            filtered_df["competitor_id"].nunique()
+            f"{filtered_df['competitor_id'].nunique():,}",
+            "Unique competitors"
         )
     with col2:
-        st.metric(
+        render_kpi(
             "Countries",
-            filtered_df["country"].nunique()
+            f"{filtered_df['country'].nunique():,}",
+            "Countries represented"
         )
     with col3:
         average_points = filtered_df["points"].mean()
-        st.metric(
+        render_kpi(
             "Average Points",
-            f"{average_points:,.2f}"
-            if pd.notna(average_points)
-            else "N/A"
+            f"{average_points:,.2f}" if pd.notna(average_points) else "N/A",
+            "Average ranking points"
         )
     with col4:
         average_rank = filtered_df["rank"].mean()
-        st.metric(
+        render_kpi(
             "Average Rank",
-            f"{average_rank:,.2f}"
-            if pd.notna(average_rank)
-            else "N/A"
+            f"{average_rank:,.2f}" if pd.notna(average_rank) else "N/A",
+            "Average player ranking"
         )
     st.divider()
 
@@ -273,7 +274,8 @@ def show():
                 "points": "Points",
                 "competitions_played": "Competitions Played"
             }),
-            hide_index=True
+            hide_index=True,
+            use_container_width=True
         )
     else:
         st.info("Rank information is not available.")
@@ -308,13 +310,31 @@ def show():
                 "Players": "Number of Players",
                 "Average_Points": "Average Points"
             },
-            template=(
-                "plotly_dark"
-                if st.session_state.get("theme", "Dark") == "Dark"
-                else "plotly_white"
+            template="plotly_dark"
+        )
+        fig_country.update_traces(
+            textposition="outside",
+            texttemplate="%{y:,.0f}",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Players: %{y:,.0f}<br>"
+                "Average Points: %{marker.color:,.2f}"
+                "<extra></extra>"
             )
         )
-        fig_country=apply_chart_theme(fig_country)
+        fig_country.update_layout(
+            height=420,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Country",
+            yaxis_title="Number of Players",
+            margin=dict(t=65, b=65, l=25, r=25),
+            title=dict(font=dict(size=19), x=0.02, xanchor="left"),
+            hoverlabel=dict(font_size=13)
+        )
+        fig_country = apply_chart_theme(fig_country)
         st.plotly_chart(fig_country,use_container_width=True)
         render_dataframe(
             country_df.rename(columns={
@@ -323,7 +343,8 @@ def show():
                 "Average_Points": "Average Points",
                 "Average_Rank": "Average Rank"
             }).round(2),
-            hide_index=True
+            hide_index=True,
+            use_container_width=True
         )
     st.divider()
 
@@ -347,14 +368,36 @@ def show():
                 "points": "Ranking Points",
                 "country": "Country"
             },
-            template=(
-                "plotly_dark"
-                if st.session_state.get("theme", "Dark") == "Dark"
-                else "plotly_white"
+            template="plotly_dark"
+        )
+        fig_relationship.update_traces(
+            marker=dict(
+                size=11,
+                opacity=0.82,
+                line=dict(width=1.2)
+            ),
+            hovertemplate=(
+                "<b>%{hovertext}</b><br>"
+                "Competitions Played: %{x:,.0f}<br>"
+                "Ranking Points: %{y:,.2f}<br>"
+                "<extra></extra>"
+            )
+        )
+        fig_relationship.update_layout(
+            height=430,
+            margin=dict(t=65, b=45, l=25, r=25),
+            title=dict(font=dict(size=19), x=0.02, xanchor="left"),
+            hoverlabel=dict(font_size=13),
+            legend=dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.25,
+                xanchor="left",
+                x=0
             )
         )
         fig_relationship = apply_chart_theme(fig_relationship)
-        st.plotly_chart(fig_relationship,use_container_width=True)
+        st.plotly_chart(fig_relationship, use_container_width=True)
     else:
         st.info("Insufficient data for this relationship chart.")
     st.divider()
@@ -373,8 +416,9 @@ def show():
         ):
             st.markdown("**Observation**")
             st.write(item["insight"])
+
             st.markdown("**Recommendation**")
-            st.info(item["recommendation"])
+            st.write(item["recommendation"])
     st.caption(
         "Recommendations are generated from the selected ranking "
         "snapshot. They describe observed data patterns and do not "

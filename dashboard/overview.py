@@ -6,7 +6,8 @@ from utils.global_filters import apply_global_filters
 from utils.styling import (
     render_section_header,
     apply_chart_theme,
-    render_dataframe
+    render_dataframe,
+    render_kpi
 )
 
 # =====================================================
@@ -196,14 +197,13 @@ def show():
     # GLOBAL PLOTLY CHART THEME
     # =================================================
 
-    theme = st.session_state.get("theme", "Dark")
-    chart_template = (
-        "plotly_dark"
-        if theme == "Dark"
-        else "plotly_white"
-    )
-    # Apply theme to all Plotly Express charts
-    px.defaults.template = chart_template
+    # Apply active application theme to Plotly charts
+    current_theme = st.session_state.get("color_theme", "Ocean Blue")
+
+    if current_theme == "Slate Mono":
+        px.defaults.template = "plotly_white"
+    else:
+        px.defaults.template = "plotly_dark"
 
     # =================================================
     # KPI CALCULATIONS
@@ -242,33 +242,44 @@ def show():
         "Key metrics summarizing the tennis ranking data.",
         "📊"
     )
-    k1, k2, k3 = st.columns(3)
-    k1.metric(
-        "Total Competitors",
-        f"{total_competitors:,}"
-    )
-    k2.metric(
-        "Countries Represented",
-        f"{total_countries:,}"
-    )
-    k3.metric(
-        "Ranking Records",
-        f"{total_records:,}"
-    )
-    k4, k5, k6 = st.columns(3)
-    k4.metric(
-        "ATP Competitors",
-        f"{atp_count:,}"
-    )
-    k5.metric(
-        "WTA Competitors",
-        f"{wta_count:,}"
-    )
-    
-    k6.metric(
-        "Highest Ranking Points",
-        f"{highest_points:,.0f}"
-    )
+    k1,k2,k3 = st.columns(3,gap="large")
+    with k1:
+        render_kpi(
+            "Total Competitors",
+            f"{total_competitors:,}",
+            "Unique tennis competitors"
+        )
+    with k2:
+        render_kpi(
+            "Countries Represented",
+            f"{total_countries:,}",
+            "Global representation"
+        )
+    with k3:
+        render_kpi(
+            "Ranking Records",
+            f"{total_records:,}",
+            "Total filtered records"
+        )
+    k4, k5, k6 = st.columns(3,gap="large")
+    with k4:
+        render_kpi(
+            "ATP Competitors",
+            f"{atp_count:,}",
+            "ATP ranking category"
+        )
+    with k5:
+        render_kpi(
+            "WTA Competitors",
+            f"{wta_count:,}",
+            "WTA ranking category"
+        )
+    with k6:
+        render_kpi(
+            "Highest Ranking Points",
+            f"{highest_points:,.0f}",
+            "Maximum points recorded"
+        )
 
     # =================================================
     # ADVANCED KPI ANALYTICS
@@ -301,9 +312,7 @@ def show():
     )
 
     total_points = valid_points["points"].sum()
-
     top_10_points = valid_points.head(10)["points"].sum()
-
     top_10_share = (
         (top_10_points / total_points) * 100
         if total_points > 0
@@ -338,44 +347,48 @@ def show():
         top_competitor_name = "N/A"
         top_competitor_points = 0
 
-    # Advanced KPI Cards
+    # =================================================
+    # ADVANCED KPI CARDS
+    # =================================================
+
     a1, a2, a3 = st.columns(3)
-
-    a1.metric(
-        "Median Ranking Position",
-        f"{median_rank:,.1f}"
-        if pd.notna(median_rank) else "N/A"
-    )
-
-    a2.metric(
-        "Median Ranking Points",
-        f"{median_points:,.0f}"
-        if pd.notna(median_points) else "N/A"
-    )
-
-    a3.metric(
-        "Average Competitions Played",
-        f"{avg_competitions:,.2f}"
-        if pd.notna(avg_competitions) else "N/A"
-    )
-
-    a4, a5, a6 = st.columns(3)
-
-    a4.metric(
-        "Top 10 Points Share",
-        f"{top_10_share:.2f}%"
-    )
-
-    a5.metric(
-        "Leading Country",
-        leading_country,
-        help="Country with the highest number of unique competitors."
-    )
-
-    a6.metric(
-        "Leading Country Competitors",
-        f"{leading_country_count:,}"
-    )
+    with a1:
+        render_kpi(
+            "Median Ranking Position",
+            f"{median_rank:,.1f}" if pd.notna(median_rank) else "N/A",
+            "Median player ranking"
+        )
+    with a2:
+        render_kpi(
+            "Median Ranking Points",
+            f"{median_points:,.0f}" if pd.notna(median_points) else "N/A",
+            "Median points across competitors"
+        )
+    with a3:
+        render_kpi(
+            "Average Competitions Played",
+            f"{avg_competitions:,.2f}" if pd.notna(avg_competitions) else "N/A",
+            "Average competitions per player"
+        )
+    a4, a5, a6 = st.columns(3, gap="large")
+    with a4:
+        render_kpi(
+            "Top 10 Points Share",
+            f"{top_10_share:.2f}%",
+            "Points held by top 10 competitors"
+        )
+    with a5:
+        render_kpi(
+            "Leading Country",
+            leading_country,
+            "Country with most unique competitors"
+        )
+    with a6:
+        render_kpi(
+            "Leading Country Competitors",
+            f"{leading_country_count:,}",
+            "Unique competitors from leading country"
+        )
 
     render_section_header(
         "Highest Points Competitor",
@@ -513,27 +526,46 @@ def show():
         "Understand how competitors are distributed across ranking tiers.",
         "🏅"
     )
-    ranking_distribution = pd.DataFrame({
-        "Ranking Category": [
-            "Top 10",
-            "11–25",
-            "26–50",
-            "51–100",
-            "101–500",
-            "Above 500"
-        ],
-        "Competitors": [
-            (filtered_df["rank"] <= 10).sum(),
-            ((filtered_df["rank"] > 10) & (filtered_df["rank"] <= 25)).sum(),
-            ((filtered_df["rank"] > 25) & (filtered_df["rank"] <= 50)).sum(),
-            ((filtered_df["rank"] > 50) & (filtered_df["rank"] <= 100)).sum(),
-            ((filtered_df["rank"] > 100) & (filtered_df["rank"] <= 500)).sum(),
-            (filtered_df["rank"] > 500).sum()
-        ]
-    })
+    ranking_analysis = filtered_df.dropna(
+        subset=["rank"]
+    ).copy()
+    ranking_bins = [0, 10, 25, 50, 100, 500, float("inf")]
+    ranking_labels = [
+        "Top 10",
+        "11–25",
+        "26–50",
+        "51–100",
+        "101–500",
+        "Above 500"
+    ]
+    ranking_analysis["Ranking Category"] = pd.cut(
+        ranking_analysis["rank"],
+        bins=ranking_bins,
+        labels=ranking_labels,
+        include_lowest=True
+    )
+    ranking_distribution = (
+        ranking_analysis
+        .groupby("Ranking Category", observed=False)
+        .agg(
+            Competitors=("competitor_id", "nunique")
+        )
+        .reset_index()
+    )
     ranking_distribution = ranking_distribution[ranking_distribution["Competitors"] > 0]
     if not ranking_distribution.empty:
-        col1, col2 = st.columns([1.2, 1])
+        total_ranked = ranking_distribution["Competitors"].sum()
+        top_100 = ranking_distribution[
+            ranking_distribution["Ranking Category"].isin(
+                ["Top 10", "11–25", "26–50", "51–100"]
+            )
+        ]["Competitors"].sum()
+        top_100_percentage = (
+            (top_100 / total_ranked) * 100
+            if total_ranked > 0 else 0
+        )
+        remaining = total_ranked - top_100
+        col1, col2 = st.columns([1.5, 1])
         with col1:
             fig = px.bar(
                 ranking_distribution,
@@ -543,31 +575,41 @@ def show():
                 text="Competitors",
                 title="Competitor Distribution Across Ranking Tiers"
             )
-            fig.update_layout(showlegend=False)
+            fig.update_traces(
+                textposition="outside",
+                textfont=dict(size=13),
+                marker_line_width=1.2,
+                hovertemplate=(
+                    "<b>%{x}</b><br>"
+                    "Competitors: %{y:,}<br>"
+                    "<extra></extra>"
+                )
+            )
+            fig.update_layout(
+                height=390,
+                bargap=0.35,
+                showlegend=False,
+                xaxis_title="Ranking Category",
+                yaxis_title="Unique Competitors",
+                margin=dict(t=65, b=35, l=25, r=25)
+            )
             apply_chart_theme(fig)
             st.plotly_chart(
                 fig,
                 use_container_width=True
             )
         with col2:
-            total_ranked = int(ranking_distribution["Competitors"].sum())
-            top_100 = int(
-                ranking_distribution[
-                    ranking_distribution["Ranking Category"].isin(
-                        ["Top 10", "11–25", "26–50", "51–100"]
-                    )
-                ]["Competitors"].sum()
+            st.markdown("#### 📊 Distribution Summary")
+            st.metric(
+                "Total Unique Competitors",
+                f"{total_ranked:,}"
             )
-            top_100_percentage = (
-                (top_100 / total_ranked) * 100
-                if total_ranked > 0 else 0
-            )
-            st.metric("Total Competitors", total_ranked)
             st.metric(
                 "Top 100 Competitors",
-                top_100,
+                f"{top_100:,}",
                 f"{top_100_percentage:.1f}% of total"
             )
+            st.markdown("#### Ranking Tier Details")
             render_dataframe(
                 ranking_distribution,
                 hide_index=True
@@ -606,7 +648,23 @@ def show():
                 text="Competitors",
                 title="Competitor Count by Gender"
             )
-            fig.update_layout(showlegend=False)
+            fig.update_traces(
+                textposition="outside",
+                textfont=dict(size=13),
+                marker_line_width=1.2,
+                hovertemplate=(
+                    "<b>%{x}</b><br>"
+                    "Competitors: %{y:,}"
+                    "<extra></extra>"
+                )
+            )
+            fig.update_layout(
+                height=380,
+                showlegend=False,
+                bargap=0.35,
+                xaxis_title="Gender",
+                yaxis_title="Number of Competitors"
+            )
             apply_chart_theme(fig)
             st.plotly_chart(
                 fig,
@@ -621,7 +679,22 @@ def show():
                 text_auto=".2f",
                 title="Average Ranking Points by Gender"
             )
-            fig.update_layout(showlegend=False)
+            fig.update_traces(
+                textposition="outside",
+                textfont=dict(size=13),
+                marker_line_width=1.2,
+                hovertemplate=(
+                    "<b>%{x}</b><br>"
+                    "Average Points: %{y:,.2f}"
+                    "<extra></extra>"
+                )
+            )
+            fig.update_layout(
+                height=380,
+                bargap=0.35,
+                xaxis_title="Gender",
+                yaxis_title="Average Ranking Points"
+            )
             apply_chart_theme(fig)
             st.plotly_chart(
                 fig,
@@ -748,11 +821,22 @@ def show():
             values="total_players",
             hole=0.65,
             title="Competitor Distribution",
-            template=chart_template
+            template="plotly_dark"
         )
         fig.update_traces(
             textposition="inside",
-            textinfo="label+percent"
+            textinfo="label+percent",
+            textfont=dict(size=13),
+            marker=dict(
+                line=dict(width=2)
+            ),
+            hovertemplate=(
+                "<b>%{label}</b><br>"
+                "Competitors: %{value:,}<br>"
+                "Share: %{percent}"
+                "<extra></extra>"
+            ),
+            hole=0.65
         )
         fig.update_layout(height=350,margin=dict(t=55, b=20, l=20, r=20))
         apply_chart_theme(fig)
@@ -768,12 +852,23 @@ def show():
                 "ranking_name": "Ranking Type",
                 "average_points": "Average Points"
             },
-            template=chart_template
+            template="plotly_dark"
+        )
+        fig.update_traces(
+            textposition="outside",
+            texttemplate="%{y:,.2f}",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Average Points: %{y:,.2f}"
+                "<extra></extra>"
+            )
         )
         fig.update_layout(
-            height=350,
-            showlegend=False,
-            margin=dict(t=55, b=20)
+            bargap=0.35,
+            yaxis_title="Average Ranking Points",
+            xaxis_title="Ranking Type"
         )
         fig = apply_chart_theme(fig)
         st.plotly_chart(fig,use_container_width=True)
@@ -816,7 +911,18 @@ def show():
                 "total_players": "Total Competitors",
                 "country_display": "Country"
             },
-            template=chart_template
+            template="plotly_dark"
+        )
+        fig.update_traces(
+            texttemplate="%{x:,}",
+            textposition="outside",
+            textfont=dict(size=12),
+            marker_line_width=1,
+            hovertemplate=(
+                "<b>%{y}</b><br>"
+                "Total Competitors: %{x:,}"
+                "<extra></extra>"
+            )
         )
         fig.update_layout(
             height=430,
@@ -851,9 +957,21 @@ def show():
                 "points": "Ranking Points",
                 "count": "Number of Players"
             },
-            template=chart_template
+            template="plotly_dark"
         )
-        fig.update_layout(height=400,margin=dict(t=55, b=30))
+        fig.update_traces(
+            marker_line_width=0.8,
+            hovertemplate=(
+                "<b>Ranking Points:</b> %{x:,.0f}<br>"
+                "<b>Number of Players:</b> %{y:,}"
+                "<extra></extra>"
+            )
+        )
+        fig.update_layout(
+            bargap=0.08,
+            xaxis_title="Ranking Points",
+            yaxis_title="Number of Players"
+        )
         fig = apply_chart_theme(fig)
         st.plotly_chart(fig,use_container_width=True)
     st.divider()
@@ -896,7 +1014,7 @@ def show():
         )
 
         # ---------------------------------------------
-        # RANKING TIER SUMMARY
+        # RANKING TIER STATISTICAL SUMMARY
         # ---------------------------------------------
 
         tier_summary = (
@@ -906,20 +1024,26 @@ def show():
                 observed=False
             )
             .agg(
-                total_competitors=(
-                    "competitor_id",
-                    "nunique"
-                ),
-                average_points=(
+                total_competitors=("competitor_id","nunique"),
+                average_points=("points","mean"),
+                median_points=("points","median"),
+                std_points=("points","std"),
+                minimum_points=("points","min"),
+                maximum_points=("points","max"),
+                q1_points=(
                     "points",
-                    "mean"
+                    lambda x: x.quantile(0.25)
                 ),
-                median_points=(
+                q3_points=(
                     "points",
-                    "median"
+                    lambda x: x.quantile(0.75)
                 )
             )
             .reset_index()
+        )
+        tier_summary["iqr_points"] = (
+            tier_summary["q3_points"] -
+            tier_summary["q1_points"]
         )
         tier_summary = tier_summary[tier_summary["total_competitors"] > 0]
 
@@ -942,13 +1066,18 @@ def show():
                     "ranking_tier": "Ranking Tier",
                     "total_competitors": "Total Competitors"
                 },
-                template=chart_template
+                template="plotly_dark"
             )
-
             fig.update_traces(
-                textposition="outside"
+                textposition="outside",
+                textfont=dict(size=13),
+                marker_line_width=1.2,
+                hovertemplate=(
+                    "<b>%{x}</b><br>"
+                    "Competitors: %{y:,}"
+                    "<extra></extra>"
+                )
             )
-
             fig.update_layout(
                 height=400,
                 showlegend=False,
@@ -979,9 +1108,18 @@ def show():
                 "ranking_tier": "Ranking Tier",
                 "points": "Ranking Points"
             },
-            template=chart_template
+            template="plotly_dark"
         )
-
+        fig.update_traces(
+            marker=dict(size=5),
+            line=dict(width=2),
+            boxmean=True,
+            hovertemplate=(
+                "<b>Ranking Tier:</b> %{x}<br>"
+                "<b>Points:</b> %{y:,.0f}"
+                "<extra></extra>"
+            )
+        )
         fig.update_layout(
             height=430,
             showlegend=False,
@@ -1019,54 +1157,82 @@ def show():
                 "points": "Ranking Points",
                 "ranking_name": "Ranking Type"
             },
-            template=chart_template
+            template="plotly_dark"
         )
-
+        fig.update_traces(
+            marker=dict(
+                size=9,
+                opacity=0.8,
+                line=dict(width=0.7)
+            ),
+            hovertemplate=(
+                "<b>%{hovertext}</b><br>"
+                "Ranking Position: %{x}<br>"
+                "Ranking Points: %{y:,.0f}<br>"
+                "<extra></extra>"
+            )
+        )
         fig.update_layout(
-            height=450,
-            xaxis_title="Ranking Position",
-            yaxis_title="Ranking Points",
-            margin=dict(t=60, b=30)
+            hovermode="closest",
+            xaxis=dict(
+                showspikes=True,
+                spikemode="across",
+                spikesnap="cursor"
+            ),
+            yaxis=dict(
+                showspikes=True,
+                spikemode="across",
+                spikesnap="cursor"
+            )
         )
         apply_chart_theme(fig)
-
         st.plotly_chart(
             fig,
             use_container_width=True
         )
 
         # ---------------------------------------------
-        # RANKING TIER STATISTICS TABLE
+        # RANKING TIER STATISTICAL SUMMARY TABLE
         # ---------------------------------------------
 
-        st.markdown("#### Ranking Tier Statistical Summary")
-
+        st.markdown("#### 📊 Ranking Tier Statistical Summary")
         display_tier_summary = tier_summary.rename(
             columns={
                 "ranking_tier": "Ranking Tier",
                 "total_competitors": "Competitors",
-                "average_points": "Average Points",
-                "median_points": "Median Points"
+                "average_points": "Mean Points",
+                "median_points": "Median Points",
+                "std_points": "Std Deviation",
+                "minimum_points": "Minimum Points",
+                "maximum_points": "Maximum Points",
+                "q1_points": "Q1 Points",
+                "q3_points": "Q3 Points",
+                "iqr_points": "IQR"
             }
         )
-
-        display_tier_summary[
-            ["Average Points", "Median Points"]
-        ] = display_tier_summary[
-            ["Average Points", "Median Points"]
-        ].round(2)
-
+        numeric_stats = [
+            "Mean Points",
+            "Median Points",
+            "Std Deviation",
+            "Minimum Points",
+            "Maximum Points",
+            "Q1 Points",
+            "Q3 Points",
+            "IQR"
+        ]
+        display_tier_summary[numeric_stats] = (
+            display_tier_summary[numeric_stats].round(2)
+        )
         render_dataframe(
             display_tier_summary,
-            hide_index=True
+            hide_index=True,
+            use_container_width=True
         )
-
     else:
         st.warning(
             "Insufficient ranking and points data "
             "for advanced ranking analysis."
         )
-
     st.divider()
 
     # =================================================

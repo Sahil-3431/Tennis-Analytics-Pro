@@ -6,7 +6,8 @@ from utils.global_filters import apply_global_filters
 from utils.styling import (
     render_section_header,
     apply_chart_theme,
-    render_dataframe
+    render_dataframe,
+    render_kpi
 )
 
 # --------------------------------------------------
@@ -148,7 +149,7 @@ def show():
     if not gender_summary.empty:
 
         # Gender KPI cards
-        gender_col1, gender_col2 = st.columns(2)
+        gender_col1, gender_col2 = st.columns(2, gap="large")
         for _, gender_row in gender_summary.iterrows():
             gender_name = str(gender_row["gender"]).upper()
             if gender_name in ["MALE", "MEN"]:
@@ -157,14 +158,15 @@ def show():
                 gender_col = gender_col2
             else:
                 continue
-
-            gender_col.metric(
+            render_kpi(
                 f"{gender_name} Competitors",
-                f"{gender_row['total_competitors']:,}"
+                f"{gender_row['total_competitors']:,}",
+                "Total competitors"
             )
-            gender_col.metric(
+            render_kpi(
                 f"{gender_name} Total Points",
-                f"{gender_row['total_points']:,.0f}"
+                f"{gender_row['total_points']:,.0f}",
+                "Combined ranking points"
             )
 
         # Competitor count comparison
@@ -180,9 +182,30 @@ def show():
                 "total_competitors": "Number of Competitors"
             }
         )
+        fig_gender_count.update_traces(
+            textposition="outside",
+            texttemplate="%{y:,.0f}",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Competitors: %{y:,}"
+                "<extra></extra>"
+            )
+        )
         fig_gender_count.update_layout(
-            height=400,
-            showlegend=False
+            height=390,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Gender",
+            yaxis_title="Number of Competitors",
+            margin=dict(t=55, b=35, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
         )
         fig_gender_count = apply_chart_theme(fig_gender_count)
         st.plotly_chart(
@@ -205,11 +228,28 @@ def show():
         )
         fig_gender_points.update_traces(
             texttemplate="%{text:,.0f}",
-            textposition="outside"
+            textposition="outside",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Total Ranking Points: %{y:,.0f}"
+                "<extra></extra>"
+            )
         )
         fig_gender_points.update_layout(
-            height=400,
-            showlegend=False
+            height=390,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Gender",
+            yaxis_title="Total Ranking Points",
+            margin=dict(t=55, b=35, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
         )
         fig_gender_points = apply_chart_theme(fig_gender_points)
         st.plotly_chart(
@@ -232,11 +272,28 @@ def show():
         )
         fig_gender_rank.update_traces(
             texttemplate="%{text:,.2f}",
-            textposition="outside"
+            textposition="outside",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Average Ranking: %{y:,.2f}"
+                "<extra></extra>"
+            )
         )
         fig_gender_rank.update_layout(
-            height=400,
-            showlegend=False
+            height=390,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Gender",
+            yaxis_title="Average Ranking Position",
+            margin=dict(t=55, b=35, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
         )
         fig_gender_rank = apply_chart_theme(fig_gender_rank)
         st.plotly_chart(
@@ -250,7 +307,8 @@ def show():
         )
         render_dataframe(
             gender_summary.round(2),
-            hide_index=True
+            hide_index=True,
+            use_container_width=True
         )
     else:
         st.info("Gender comparison data is not available.")
@@ -293,9 +351,35 @@ def show():
                 "gender": "Gender"
             }
         )
+        fig_country_gender.update_traces(
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Gender: %{fullData.name}<br>"
+                "Competitors: %{y:,}"
+                "<extra></extra>"
+            )
+        )
         fig_country_gender.update_layout(
             height=500,
-            xaxis_tickangle=-45
+            barmode="group",
+            xaxis_title="Country",
+            yaxis_title="Number of Competitors",
+            xaxis_tickangle=-45,
+            margin=dict(t=65, b=100, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.25,
+                xanchor="center",
+                x=0.5
+            )
         )
         fig_country_gender = apply_chart_theme(fig_country_gender)
         st.plotly_chart(
@@ -315,7 +399,8 @@ def show():
         )
         render_dataframe(
             country_gender_pivot,
-            hide_index=True
+            hide_index=True,
+            use_container_width=True
         )
     else:
         st.info("Country-wise gender distribution is not available.")
@@ -342,24 +427,32 @@ def show():
     total_competitors = (filtered_df["competitor_id"].nunique())
     total_points = filtered_df["points"].sum()
     average_rank = filtered_df["rank"].mean()
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric(
-        "Total Countries",
-        f"{total_countries:,}"
-    )
-    col2.metric(
-        "Total Competitors",
-        f"{total_competitors:,}"
-    )
-    col3.metric(
-        "Total Ranking Points",
-        f"{total_points:,.0f}"
-    )
-    col4.metric(
-        "Average Ranking",
-        f"{average_rank:,.2f}"
-        if pd.notna(average_rank) else "N/A"
-    )
+    # Country KPIs
+    col1,col2,col3,col4 = st.columns(4, gap="large")
+    with col1:
+        render_kpi(
+            "Total Countries",
+            f"{total_countries:,}",
+            "Countries represented"
+        )
+    with col2:
+        render_kpi(
+            "Total Competitors",
+            f"{total_competitors:,}",
+            "Across all countries"
+        )
+    with col3:
+        render_kpi(
+            "Total Ranking Points",
+            f"{total_points:,.0f}",
+            "Combined ranking points"
+        )
+    with col4:
+        render_kpi(
+            "Average Ranking",
+            f"{average_rank:,.2f}",
+            "Average ranking position"
+        )
     st.divider()
 
     # --------------------------------------------------
@@ -381,7 +474,7 @@ def show():
         .head(15)
     )
     if not country_competitors.empty:
-        fig_competitors = px.bar(
+        fig_country_count = px.bar(
             country_competitors,
             x="country",
             y="competitors",
@@ -392,9 +485,35 @@ def show():
                 "competitors": "Number of Competitors"
             }
         )
-        fig_competitors = apply_chart_theme(fig_competitors)
+        fig_country_count.update_traces(
+            textposition="outside",
+            texttemplate="%{y:,.0f}",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Competitors: %{y:,}"
+                "<extra></extra>"
+            )
+        )
+        fig_country_count.update_layout(
+            height=420,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Country",
+            yaxis_title="Number of Competitors",
+            xaxis_tickangle=-45,
+            margin=dict(t=65, b=65, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
+        )
+        fig_country_count = apply_chart_theme(fig_country_count)
         st.plotly_chart(
-            fig_competitors,
+            fig_country_count,
             use_container_width=True
         )
     st.divider()
@@ -418,7 +537,7 @@ def show():
         .head(15)
     )
     if not country_points.empty:
-        fig_points = px.bar(
+        fig_country_points = px.bar(
             country_points,
             x="country",
             y="total_points",
@@ -429,9 +548,35 @@ def show():
                 "total_points": "Total Ranking Points"
             }
         )
-        fig_points= apply_chart_theme(fig_points)
+        fig_country_points.update_traces(
+            textposition="outside",
+            texttemplate="%{y:,.0f}",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Total Ranking Points: %{y:,.0f}"
+                "<extra></extra>"
+            )
+        )
+        fig_country_points.update_layout(
+            height=420,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Country",
+            yaxis_title="Total Ranking Points",
+            xaxis_tickangle=-45,
+            margin=dict(t=65, b=65, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
+        )
+        fig_country_points = apply_chart_theme(fig_country_points)
         st.plotly_chart(
-            fig_points,
+            fig_country_points,
             use_container_width=True
         )
     st.divider()
@@ -457,7 +602,7 @@ def show():
         .head(15)
     )
     if not country_rank.empty:
-        fig_rank = px.bar(
+        fig_country_rank = px.bar(
             country_rank,
             x="country",
             y="average_rank",
@@ -468,9 +613,35 @@ def show():
                 "average_rank": "Average Ranking"
             }
         )
-        fig_rank= apply_chart_theme(fig_rank)
+        fig_country_rank.update_traces(
+            textposition="outside",
+            texttemplate="%{y:,.2f}",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Average Ranking: %{y:,.2f}"
+                "<extra></extra>"
+            )
+        )
+        fig_country_rank.update_layout(
+            height=420,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Country",
+            yaxis_title="Average Ranking Position",
+            xaxis_tickangle=-45,
+            margin=dict(t=65, b=65, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
+        )
+        fig_country_rank = apply_chart_theme(fig_country_rank)
         st.plotly_chart(
-            fig_rank,
+            fig_country_rank,
             use_container_width=True
         )
         st.caption(
@@ -489,16 +660,49 @@ def show():
         "🥇"
     )
     if not country_points.empty:
-        fig_pie = px.pie(
+        fig_country_pie = px.pie(
             country_points,
             names="country",
             values="total_points",
             title="Ranking Points Contribution – Top 15 Countries",
             hole=0.4
         )
-        fig_pie = apply_chart_theme(fig_pie)
+        fig_country_pie.update_traces(
+            hole=0.65,
+            textposition="inside",
+            textinfo="label+percent",
+            textfont=dict(size=13),
+            marker=dict(
+                line=dict(width=2)
+            ),
+            hovertemplate=(
+                "<b>%{label}</b><br>"
+                "Total Points: %{value:,.0f}<br>"
+                "Share: %{percent}"
+                "<extra></extra>"
+            )
+        )
+        fig_country_pie.update_layout(
+            height=600,
+            margin=dict(t=65, b=140, l=35, r=35),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.25,
+                xanchor="center",
+                x=0.5,
+                font=dict(size=13)
+            )
+        )
+        fig_country_pie = apply_chart_theme(fig_country_pie)
         st.plotly_chart(
-            fig_pie,
+            fig_country_pie,
             use_container_width=True
         )
     st.divider()
@@ -526,8 +730,9 @@ def show():
     )
     country_summary = country_summary.sort_values("total_points",ascending=False)
     render_dataframe(
-        country_summary,
-        hide_index=True
+        country_summary.round(2),
+        hide_index=True,
+        use_container_width=True
     )
 
     # --------------------------------------------------
@@ -554,7 +759,8 @@ def show():
     directory = directory.sort_values("rank",ascending=True)
     render_dataframe(
         directory,
-        hide_index=True
+        hide_index=True,
+        use_container_width=True
     )
 
     # --------------------------------------------------

@@ -9,8 +9,6 @@ from dashboard import insights
 from dashboard import sql_analytics
 from dashboard import performance_analysis
 from dashboard import data_quality
-from pathlib import Path
-import streamlit.components.v1 as components
 
 # ==========================================
 # PAGE CONFIGURATION
@@ -24,41 +22,13 @@ st.set_page_config(
 )
 
 # ==========================================
-# SYSTEM THEME DETECTION
-# ==========================================
-
-theme_detector = components.declare_component(
-    "theme_detector",
-    path=str(
-        Path(__file__).parent
-        / "components"
-        / "theme_detector"
-    )
-)
-
-# ==========================================
 # SESSION STATE
 # ==========================================
 
-if "theme_mode" not in st.session_state:
-    st.session_state.theme_mode = "System"
+if "color_theme" not in st.session_state:
+    st.session_state.color_theme = "Ocean Blue"
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Executive Dashboard"
-
-# Get live browser / OS theme preference
-detected_theme = theme_detector(
-    default="Dark",
-    key="system_theme_detector"
-)
-if detected_theme not in ["Light", "Dark"]:
-    detected_theme = "Dark"
-st.session_state.system_theme = detected_theme
-
-# Apply manual or automatic theme
-if st.session_state.theme_mode == "System":
-    st.session_state.theme = detected_theme
-else:
-    st.session_state.theme = st.session_state.theme_mode
 
 # ==========================================
 # APPLY DESIGN
@@ -77,23 +47,22 @@ render_sidebar()
 # ==========================================
 
 page = st.session_state.current_page
-
 if page == "Executive Dashboard":
     overview.show()
+elif page == "Data Quality":
+    data_quality.show()
 elif page == "Player Rankings":
     rankings.show()
+elif page == "Performance Analysis":
+    performance_analysis.show()
 elif page == "Competitor Explorer":
     competitor.show()
 elif page == "Country Analytics":
     country.show()
-elif page == "Performance Analysis":
-    performance_analysis.show()
-elif page == "Data Quality":
-    data_quality.show()
-elif page == "Insights & Recommendations":
-    insights.show()
 elif page == "SQL Analytics":
     sql_analytics.show()
+elif page == "Insights & Recommendations":
+    insights.show()
 
 # ==========================================
 # FOOTER

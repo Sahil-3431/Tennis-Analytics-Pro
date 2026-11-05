@@ -6,7 +6,8 @@ from utils.global_filters import apply_global_filters
 from utils.styling import (
     render_section_header,
     apply_chart_theme,
-    render_dataframe
+    render_dataframe,
+    render_kpi
 )
 
 # --------------------------------------------------
@@ -127,21 +128,26 @@ def show():
     total_countries = filtered_df["country"].nunique()
     average_points = filtered_df["points"].mean()
     best_rank = filtered_df["rank"].min()
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total Competitors", f"{total_players:,}")
-    col2.metric("Countries", f"{total_countries:,}")
-    col3.metric(
-        "Average Points",
-        f"{average_points:,.2f}" if pd.notna(average_points) else "N/A"
-    )
-    col4.metric(
-        "Best Ranking",
-        f"{int(best_rank)}" if pd.notna(best_rank) else "N/A"
-    )
+    col1, col2, col3 = st.columns(3, gap="large")
+    with col1:
+        render_kpi(
+            "Total Competitors",
+            f"{total_players:,}",
+            "Unique competitors"
+        )
+    with col2:
+        render_kpi(
+            "Countries",
+            f"{total_countries:,}",
+            "Represented countries"
+        )
+    with col3:
+        render_kpi(
+            "Average Points",
+            f"{average_points:,.2f}" if pd.notna(average_points) else "N/A",
+            "Average ranking points"
+        )
     st.divider()
-    if filtered_df.empty:
-        st.warning("No competitors match the selected filters.")
-        return
 
     # --------------------------------------------------
     # INDIVIDUAL PLAYER PROFILE
@@ -159,26 +165,31 @@ def show():
     if not player_data.empty:
         player = player_data.iloc[0]
         st.markdown(f"### {player['competitor_name']}")
-        p1, p2, p3, p4 = st.columns(4)
-        p1.metric(
-            "Current Rank",
-            int(player["rank"]) if pd.notna(player["rank"]) else "N/A"
-        )
-        p2.metric(
-            "Ranking Points",
-            f"{player['points']:,.0f}"
-            if pd.notna(player["points"]) else "N/A"
-        )
-        p3.metric(
-            "Movement",
-            f"{player['movement']:,.0f}"
-            if pd.notna(player["movement"]) else "N/A"
-        )
-        p4.metric(
-            "Competitions Played",
-            int(player["competitions_played"])
-            if pd.notna(player["competitions_played"]) else "N/A"
-        )
+        p1, p2, p3, p4 = st.columns(4, gap="large")
+        with p1:
+            render_kpi(
+                "Current Rank",
+                f"{int(player['rank'])}" if pd.notna(player["rank"]) else "N/A",
+                "Current ranking position"
+            )
+        with p2:
+            render_kpi(
+                "Ranking Points",
+                f"{player['points']:,.0f}" if pd.notna(player["points"]) else "N/A",
+                "Total ranking points"
+            )
+        with p3:
+            render_kpi(
+                "Movement",
+                f"{player['movement']:,.0f}" if pd.notna(player["movement"]) else "N/A",
+                "Ranking movement value"
+            )
+        with p4:
+            render_kpi(
+                "Competitions Played",
+                f"{int(player['competitions_played'])}" if pd.notna(player["competitions_played"]) else "N/A",
+                "Total competitions"
+            )
         profile_col1, profile_col2 = st.columns(2)
         with profile_col1:
             st.write("**Competitor ID:**", player["competitor_id"])
@@ -247,25 +258,31 @@ def show():
         # ADVANCED KPI CARDS
         # ==========================================
 
-        insight_col1, insight_col2, insight_col3 = st.columns(3)
-        insight_col1.metric(
-            "Points per Competition",
-            f"{points_per_competition:,.2f}"
-            if points_per_competition is not None
-            else "N/A"
-        )
-        insight_col2.metric(
-            "Ranking Percentile",
-            f"{ranking_percentile:.2f}%"
-            if ranking_percentile is not None
-            else "N/A"
-        )
-        insight_col3.metric(
-            "Points vs Category Median",
-            f"{points_difference:+,.0f}"
-            if points_difference is not None
-            else "N/A"
-        )
+        insight_col1, insight_col2, insight_col3 = st.columns(3, gap="large")
+        with insight_col1:
+            render_kpi(
+                "Points per Competition",
+                f"{points_per_competition:,.2f}"
+                if points_per_competition is not None
+                else "N/A",
+                "Average points per competition"
+            )
+        with insight_col2:
+            render_kpi(
+                "Ranking Percentile",
+                f"{ranking_percentile:.2f}%"
+                if ranking_percentile is not None
+                else "N/A",
+                "Position within category"
+            )
+        with insight_col3:
+            render_kpi(
+                "Points vs Category Median",
+                f"{points_difference:+,.0f}"
+                if points_difference is not None
+                else "N/A",
+                "Difference from category median"
+            )
 
         # ==========================================
         # CATEGORY BENCHMARK COMPARISON
@@ -311,14 +328,28 @@ def show():
             )
             fig_benchmark.update_traces(
                 texttemplate="%{text:,.0f}",
-                textposition="outside"
+                textposition="outside",
+                textfont=dict(size=13),
+                marker_line_width=1.2,
+                hovertemplate=(
+                    "<b>%{x}</b><br>"
+                    "Ranking Points: %{y:,.0f}"
+                    "<extra></extra>"
+                )
             )
             fig_benchmark.update_layout(
                 height=400,
                 showlegend=False,
+                bargap=0.35,
                 yaxis_title="Ranking Points",
                 xaxis_title="",
-                margin=dict(t=60, b=30)
+                margin=dict(t=60, b=35, l=25, r=25),
+                title=dict(
+                    font=dict(size=19),
+                    x=0.02,
+                    xanchor="left"
+                ),
+                hoverlabel=dict(font_size=13)
             )
             fig_benchmark = apply_chart_theme(fig_benchmark)
             st.plotly_chart(
@@ -398,11 +429,32 @@ def show():
             },
             text="competitors"
         )
-        fig_country = apply_chart_theme(fig_country)
-        fig_country.update_layout(
-            xaxis_title="Country",
-            yaxis_title="Competitors"
+        fig_country.update_traces(
+            textposition="outside",
+            texttemplate="%{y:,.0f}",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Competitors: %{y:,}"
+                "<extra></extra>"
+            )
         )
+        fig_country.update_layout(
+            height=420,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Country",
+            yaxis_title="Competitors",
+            margin=dict(t=65, b=65, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
+        )
+        fig_country = apply_chart_theme(fig_country)
         st.plotly_chart(fig_country, use_container_width=True)
     st.divider()
 
@@ -423,6 +475,28 @@ def show():
             nbins=20,
             title="Distribution of Competitor Ranking Points",
             labels={"points": "Ranking Points"}
+        )
+        fig_points.update_traces(
+            marker_line_width=1.2,
+            hovertemplate=(
+                "Ranking Points Range: %{x}<br>"
+                "Number of Competitors: %{y:,}"
+                "<extra></extra>"
+            )
+        )
+        fig_points.update_layout(
+            height=420,
+            showlegend=False,
+            bargap=0.08,
+            xaxis_title="Ranking Points",
+            yaxis_title="Number of Competitors",
+            margin=dict(t=65, b=45, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
         )
         fig_points = apply_chart_theme(fig_points)
         st.plotly_chart(fig_points, use_container_width=True)
@@ -450,9 +524,21 @@ def show():
     ]
     directory = filtered_df[directory_columns].copy()
     directory = directory.sort_values("rank",ascending=True)
+    directory = directory.rename(columns={
+        "competitor_id": "Competitor ID",
+        "competitor_name": "Competitor",
+        "abbreviation": "Abbreviation",
+        "country": "Country",
+        "rank": "Rank",
+        "points": "Ranking Points",
+        "movement": "Movement",
+        "competitions_played": "Competitions Played",
+        "ranking_name": "Ranking Category"
+    })
     render_dataframe(
         directory,
-        hide_index=True
+        hide_index=True,
+        use_container_width=True
     )
 
     # --------------------------------------------------

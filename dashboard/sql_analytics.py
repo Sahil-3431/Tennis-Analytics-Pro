@@ -5,7 +5,12 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 from database.connection import get_connection
-from utils.styling import render_section_header, apply_chart_theme, render_dataframe
+from utils.styling import (
+    render_section_header,
+    apply_chart_theme,
+    render_dataframe,
+    render_kpi
+)
 
 # =========================================================
 # READ-ONLY SQL EXECUTION
@@ -904,12 +909,19 @@ def render_query_history():
             "Execute a query from Query Library or Own SQL Query."
         )
         return
-    col1, col2 = st.columns(2)
-    col1.metric("Total Executions", len(history))
-    col2.metric(
-        "Unique Query Sources",
-        len(set(item["source"] for item in history))
-    )
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
+        render_kpi(
+            "Total Executions",
+            f"{len(history):,}",
+            "SQL queries executed"
+        )
+    with col2:
+        render_kpi(
+            "Unique Query Sources",
+            f"{len(set(item['source'] for item in history)):,}",
+            "Different query sources"
+        )
     st.divider()
     if st.button(
         "Clear Query History",
@@ -923,12 +935,26 @@ def render_query_history():
             f"{index + 1}. {item['source']} "
             f"• {item['executed_at']}"
         )
-
         with st.expander(title):
-            info_col1, info_col2, info_col3 = st.columns(3)
-            info_col1.metric("Result Rows", item["rows"])
-            info_col2.metric("Columns", item["columns"])
-            info_col3.metric("Source", item["source"])
+            metric_col1, metric_col2, metric_col3 = st.columns(3, gap="large")
+            with metric_col1:
+                render_kpi(
+                    "Result Rows",
+                    f"{item['rows']:,}",
+                    "Records returned"
+                )
+            with metric_col2:
+                render_kpi(
+                    "Result Columns",
+                    f"{item['columns']:,}",
+                    "Columns returned"
+                )
+            with metric_col3:
+                render_kpi(
+                    "Source",
+                    item["source"],
+                    "Query execution source"
+                )
             st.markdown("**Executed SQL Query**")
             st.code(
                 item["query"],
@@ -956,14 +982,25 @@ def render_query_result(result_df, key_prefix):
         st.info("No records returned by this query.")
         return
 
-    col1, col2, col3 = st.columns(3)
-
-    col1.metric("Result Rows", f"{len(result_df):,}")
-    col2.metric("Result Columns", f"{len(result_df.columns):,}")
-    col3.metric(
-        "Memory Usage",
-        f"{result_df.memory_usage(deep=True).sum() / 1024:.1f} KB"
-    )
+    col1, col2, col3 = st.columns(3, gap="large")
+    with col1:
+        render_kpi(
+            "Result Rows",
+            f"{len(result_df):,}",
+            "Records returned"
+        )
+    with col2:
+        render_kpi(
+            "Result Columns",
+            f"{len(result_df.columns):,}",
+            "Columns returned"
+        )
+    with col3:
+        render_kpi(
+            "Memory Usage",
+            f"{result_df.memory_usage(deep=True).sum() / 1024:.1f} KB",
+            "Result DataFrame size"
+        )
     render_section_header(
         "Query Result",
         "Data returned by the executed SQL statement.",
@@ -971,7 +1008,8 @@ def render_query_result(result_df, key_prefix):
     )
     render_dataframe(
         result_df,
-        hide_index=True
+        hide_index=True,
+        use_container_width=True
     )
 
     csv_data = result_df.to_csv(
@@ -1029,13 +1067,7 @@ def render_query_result(result_df, key_prefix):
         ].dropna().head(100)
 
         if not chart_df.empty:
-
-            template = (
-                "plotly_dark"
-                if st.session_state.get("theme", "Dark") == "Dark"
-                else "plotly_white"
-            )
-
+            template = "plotly_dark"
             if chart_type == "Bar":
                 fig = px.bar(
                     chart_df,
@@ -1064,12 +1096,22 @@ def render_query_result(result_df, key_prefix):
                     title=f"{value_column} by {category_column}",
                     template=template
                 )
-
+            fig.update_traces(
+                marker_line_width=1.2,
+                hoverlabel=dict(font_size=13)
+            )
             fig.update_layout(
                 height=450,
-                showlegend=False
+                showlegend=False,
+                margin=dict(t=65, b=55, l=25, r=25),
+                title=dict(
+                    font=dict(size=19),
+                    x=0.02,
+                    xanchor="left"
+                ),
+                hoverlabel=dict(font_size=13)
             )
-            fig=apply_chart_theme(fig)
+            fig = apply_chart_theme(fig)
             st.plotly_chart(
                 fig,
                 use_container_width=True

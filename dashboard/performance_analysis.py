@@ -6,7 +6,8 @@ from utils.global_filters import apply_global_filters
 from utils.styling import (
     render_section_header,
     apply_chart_theme,
-    render_dataframe
+    render_dataframe,
+    render_kpi
 )
 
 # --------------------------------------------------
@@ -113,43 +114,52 @@ def show():
         "📊"
     )
     total_records = len(filtered_df)
-    total_competitors = (filtered_df["competitor_id"].nunique())
+    total_competitors = filtered_df["competitor_id"].nunique()
     average_rank = filtered_df["rank"].mean()
     average_points = filtered_df["points"].mean()
     average_movement = filtered_df["movement"].mean()
-    average_competitions = (filtered_df["competitions_played"].mean())
-    col1, col2, col3 = st.columns(3)
-    col1.metric(
-        "Ranking Records",
-        f"{total_records:,}"
-    )
-    col2.metric(
-        "Unique Competitors",
-        f"{total_competitors:,}"
-    )
-    col3.metric(
-        "Average Rank",
-        f"{average_rank:,.2f}"
-        if pd.notna(average_rank) else "N/A"
-    )
+    average_competitions = filtered_df["competitions_played"].mean()
 
-    col1, col2, col3 = st.columns(3)
-
-    col1.metric(
-        "Average Points",
-        f"{average_points:,.2f}"
-        if pd.notna(average_points) else "N/A"
-    )
-    col2.metric(
-        "Average Movement Value",
-        f"{average_movement:,.2f}"
-        if pd.notna(average_movement) else "N/A"
-    )
-    col3.metric(
-        "Avg. Competitions Played",
-        f"{average_competitions:,.2f}"
-        if pd.notna(average_competitions) else "N/A"
-    )
+    # First KPI Row
+    col1, col2, col3 = st.columns(3, gap="large")
+    with col1:
+        render_kpi(
+            "Ranking Records",
+            f"{total_records:,}",
+            "Total ranking records"
+        )
+    with col2:
+        render_kpi(
+            "Unique Competitors",
+            f"{total_competitors:,}",
+            "Distinct competitors"
+        )
+    with col3:
+        render_kpi(
+            "Average Rank",
+            f"{average_rank:,.2f}" if pd.notna(average_rank) else "N/A",
+            "Average ranking position"
+        )
+    # Second KPI Row
+    col4, col5, col6 = st.columns(3, gap="large")
+    with col4:
+        render_kpi(
+            "Average Points",
+            f"{average_points:,.2f}" if pd.notna(average_points) else "N/A",
+            "Average ranking points"
+        )
+    with col5:
+        render_kpi(
+            "Average Movement",
+            f"{average_movement:,.2f}" if pd.notna(average_movement) else "N/A",
+            "Average movement value"
+        )
+    with col6:
+        render_kpi(
+            "Avg. Competitions Played",
+            f"{average_competitions:,.2f}" if pd.notna(average_competitions) else "N/A",
+            "Average competitions played"
+        )
     st.divider()
 
     # --------------------------------------------------
@@ -179,6 +189,31 @@ def show():
             y="Number of Competitors",
             title="Distribution of Ranking Movement Values",
             text="Number of Competitors"
+        )
+        fig_movement.update_traces(
+        textposition="outside",
+        texttemplate="%{y:,.0f}",
+        textfont=dict(size=13),
+        marker_line_width=1.2,
+        hovertemplate=(
+            "<b>Movement: %{x}</b><br>"
+            "Competitors: %{y:,}"
+            "<extra></extra>"
+            )
+        )
+        fig_movement.update_layout(
+            height=390,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Movement Value",
+            yaxis_title="Number of Competitors",
+            margin=dict(t=55, b=35, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
         )
         fig_movement = apply_chart_theme(fig_movement)
         st.plotly_chart(
@@ -220,6 +255,38 @@ def show():
                 "ranking_name": "Ranking Category"
             }
         )
+        fig_rank_points.update_traces(
+        marker=dict(
+            size=11,
+            opacity=0.82,
+            line=dict(width=1.2)
+            ),
+            hovertemplate=(
+                "<b>%{hovertext}</b><br>"
+                "Rank: %{x}<br>"
+                "Points: %{y:,.0f}<br>"
+                "Country: %{customdata[0]}<br>"
+                "Movement: %{customdata[1]}"
+                "<extra></extra>"
+            )
+        )
+        fig_rank_points.update_layout(
+            height=430,
+            margin=dict(t=65, b=45, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.30,
+                xanchor="left",
+                x=0
+            )
+        )
         fig_rank_points= apply_chart_theme(fig_rank_points)
         st.plotly_chart(
             fig_rank_points,
@@ -252,6 +319,38 @@ def show():
                 "competitions_played": "Competitions Played",
                 "points": "Ranking Points"
             }
+        )
+        fig_competitions.update_traces(
+            marker=dict(
+                size=11,
+                opacity=0.82,
+                line=dict(width=1.2)
+                ),
+            hovertemplate=(
+                "<b>%{hovertext}</b><br>"
+                "Competitions Played: %{x}<br>"
+                "Ranking Points: %{y:,.0f}<br>"
+                "Rank: %{customdata[0]}<br>"
+                "Country: %{customdata[1]}"
+                "<extra></extra>"
+            )
+        )
+        fig_competitions.update_layout(
+            height=430,
+            margin=dict(t=65, b=45, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.30,
+                xanchor="left",
+                x=0
+            )
         )
         fig_competitions = apply_chart_theme(fig_competitions)
         st.plotly_chart(
@@ -289,7 +388,39 @@ def show():
                 "points": "Ranking Points"
             }
         )
-        fig_top = apply_chart_theme(fig_top)
+        fig_top.update_traces(
+            textposition="outside",
+            texttemplate="%{y:,.0f}",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Ranking Points: %{y:,.0f}<br>"
+                "Ranking: %{fullData.name}"
+                "<extra></extra>"
+            )
+        )
+        fig_top.update_layout(
+            height=430,
+            bargap=0.35,
+            margin=dict(t=65, b=65, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.35,
+                xanchor="left",
+                x=0
+            ),
+            xaxis_title="Competitor",
+            yaxis_title="Ranking Points"
+        )
+        fig_top= apply_chart_theme(fig_top)
         st.plotly_chart(
             fig_top,
             use_container_width=True
@@ -321,9 +452,19 @@ def show():
         "points",
         ascending=False
     )
+    summary_df = summary_df.rename(columns={
+        "competitor_name": "Competitor",
+        "country": "Country",
+        "ranking_name": "Ranking Category",
+        "rank": "Rank",
+        "points": "Ranking Points",
+        "movement": "Movement",
+        "competitions_played": "Competitions Played"
+    })
     render_dataframe(
         summary_df,
-        hide_index=True
+        hide_index=True,
+        use_container_width=True
     )
 
     # --------------------------------------------------

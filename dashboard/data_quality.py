@@ -6,7 +6,8 @@ from utils.global_filters import apply_global_filters
 from utils.styling import (
     render_section_header,
     apply_chart_theme,
-    render_dataframe
+    render_dataframe,
+    render_kpi
 )
 
 # --------------------------------------------------
@@ -119,18 +120,46 @@ def show():
         "Summary of key data quality metrics.",
         "📊"
     )
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total Records", f"{total_records:,}")
-    col2.metric("Total Columns", f"{total_columns:,}")
-    col3.metric("Completeness", f"{completeness:.2f}%")
-    col4.metric("Duplicate Rows", f"{duplicate_records:,}")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Unique Competitors", f"{unique_competitors:,}")
-    col2.metric("Unique Countries", f"{unique_countries:,}")
-    col3.metric(
-        "Duplicate Ranking Records",
-        f"{duplicate_competitor_records:,}"
-    )
+    # First KPI Row
+    k1, k2, k3 = st.columns(3, gap="large")
+    with k1:
+        render_kpi(
+            "Total Records",
+            f"{total_records:,}",
+            "Total database records"
+        )
+    with k2:
+        render_kpi(
+            "Total Columns",
+            f"{total_columns:,}",
+            "Total dataset columns"
+        )
+    with k3:
+        render_kpi(
+            "Completeness",
+            f"{completeness:.2f}%",
+            "Overall data completeness"
+        )
+    # Second KPI Row
+    k4, k5, k6 = st.columns(3, gap="large")
+    with k4:
+        render_kpi(
+            "Duplicate Rows",
+            f"{duplicate_records:,}",
+            "Exact duplicate records"
+        )
+    with k5:
+        render_kpi(
+            "Unique Competitors",
+            f"{unique_competitors:,}",
+            "Distinct competitors"
+        )
+    with k6:
+        render_kpi(
+            "Unique Countries",
+            f"{unique_countries:,}",
+            "Countries represented"
+        )
     st.divider()
 
     # --------------------------------------------------
@@ -161,6 +190,31 @@ def show():
             y="Missing Values",
             text="Missing Values",
             title="Missing Values by Column"
+        ) 
+        fig_missing.update_traces(
+            textposition="outside",
+            texttemplate="%{y:,.0f}",
+            textfont=dict(size=13),
+            marker_line_width=1.2,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Missing Values: %{y:,}"
+                "<extra></extra>"
+            )
+        )
+        fig_missing.update_layout(
+            height=390,
+            showlegend=False,
+            bargap=0.35,
+            xaxis_title="Column",
+            yaxis_title="Missing Values",
+            margin=dict(t=55, b=45, l=25, r=25),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            hoverlabel=dict(font_size=13)
         )
         fig_missing = apply_chart_theme(fig_missing)
         st.plotly_chart(

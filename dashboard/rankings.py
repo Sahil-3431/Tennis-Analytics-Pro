@@ -6,7 +6,8 @@ from utils.global_filters import apply_global_filters
 from utils.styling import (
     render_section_header,
     apply_chart_theme,
-    render_dataframe
+    render_dataframe,
+    render_kpi
 )
 
 # =====================================================
@@ -192,6 +193,7 @@ def show():
     best_rank = ranking_df["rank"].min()
     total_competitions = ranking_df["competitions_played"].sum()
 
+    
     # =================================================
     # KPI DISPLAY
     # =================================================
@@ -201,35 +203,33 @@ def show():
         "Key performance indicators for the selected ranking category.",
         "📊"
     )
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric(
-        "Players Displayed",
-        f"{total_players:,}"
-    )
-    k2.metric(
-        "Average Points",
-        f"{average_points:,.1f}"
-    )
-    k3.metric(
-        "Highest Points",
-        f"{highest_points:,.0f}"
-    )
-    k4.metric(
-        "Best Rank",
-        f"#{best_rank:,.0f}"
-    )
+    k1, k2, k3 = st.columns(3, gap="large")
+    with k1:
+        render_kpi(
+            "Players Displayed",
+            f"{total_players:,}",
+            "Unique players in selected leaderboard"
+        )
+    with k2:
+        render_kpi(
+            "Average Points",
+            f"{average_points:,.1f}",
+            "Average ranking points"
+        )
+    with k3:
+        render_kpi(
+            "Highest Points",
+            f"{highest_points:,.0f}",
+            "Maximum ranking points"
+        )
     st.divider()
 
     # =================================================
     # CHART THEME
     # =================================================
 
-    theme = st.session_state.get("theme", "Dark")
-    chart_template = (
-        "plotly_dark"
-        if theme == "Dark"
-        else "plotly_white"
-    )
+    # Use dark Plotly base for the active color palette
+    chart_template = "plotly_dark"
 
     # =================================================
     # PLAYER POINTS COMPARISON
@@ -254,11 +254,30 @@ def show():
         },
         template=chart_template
     )
+    fig.update_traces(
+        textposition="outside",
+        texttemplate="%{x:,.0f}",
+        textfont=dict(size=13),
+        marker_line_width=1.2,
+        hovertemplate=(
+            "<b>%{y}</b><br>"
+            "Ranking Points: %{x:,}"
+            "<extra></extra>"
+        )
+    )
     fig.update_layout(
-        height=450,
+        height=430,
         showlegend=False,
+        bargap=0.35,
+        xaxis_title="Ranking Points",
         yaxis_title=None,
-        margin=dict(t=60, b=30)
+        margin=dict(t=55, b=35, l=25, r=35),
+        title=dict(
+            font=dict(size=19),
+            x=0.02,
+            xanchor="left"
+        ),
+        hoverlabel=dict(font_size=13)
     )
     fig = apply_chart_theme(fig)
     st.plotly_chart(
@@ -299,9 +318,30 @@ def show():
                 },
                 template=chart_template
             )
+            fig.update_traces(
+                textposition="outside",
+                texttemplate="%{y:,.0f}",
+                textfont=dict(size=13),
+                marker_line_width=1.2,
+                hovertemplate=(
+                    "<b>Movement: %{x}</b><br>"
+                    "Players: %{y:,}"
+                    "<extra></extra>"
+                )
+            )
             fig.update_layout(
-                height=370,
-                margin=dict(t=55, b=30)
+                height=390,
+                showlegend=False,
+                bargap=0.35,
+                yaxis_title="Number of Players",
+                xaxis_title="Movement Value",
+                margin=dict(t=55, b=35, l=25, r=25),
+                title=dict(
+                    font=dict(size=19),
+                    x=0.02,
+                    xanchor="left"
+                ),
+                hoverlabel=dict(font_size=13)
             )
             fig = apply_chart_theme(fig)
             st.plotly_chart(
@@ -336,10 +376,37 @@ def show():
             hole=0.6,
             title="Movement Status Overview",
             template=chart_template
+        ) 
+        fig.update_traces(
+            textposition="inside",
+            textinfo="label+percent",
+            textfont=dict(size=13),
+            marker=dict(
+                line=dict(width=2)
+            ),
+            hovertemplate=(
+                "<b>%{label}</b><br>"
+                "Players: %{value:,}<br>"
+                "Share: %{percent}"
+                "<extra></extra>"
+            ),
+            hole=0.6
         )
         fig.update_layout(
-            height=370,
-            margin=dict(t=55, b=30)
+            height=390,
+            margin=dict(t=55, b=45, l=20, r=20),
+            title=dict(
+                font=dict(size=19),
+                x=0.02,
+                xanchor="left"
+            ),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.12,
+                xanchor="center",
+                x=0.5
+            )
         )
         fig = apply_chart_theme(fig)
         st.plotly_chart(fig,use_container_width=True)
@@ -397,35 +464,56 @@ def show():
         player_options,
         key="rank_player_detail"
     )
-    player = ranking_df[ranking_df["competitor_name"] == selected_player].iloc[0]
+    player = ranking_df[
+        ranking_df["competitor_name"] == selected_player
+    ].iloc[0]
 
-    p1, p2, p3, p4 = st.columns(4)
-
-    p1.metric(
-        "Player Rank",
-        f"#{player['rank']:,.0f}"
-    )
-    p2.metric(
-        "Ranking Points",
-        f"{player['points']:,.0f}"
-    )
-    p3.metric(
-        "Competitions Played",
-        f"{player['competitions_played']:,.0f}"
-        if pd.notna(player["competitions_played"])
-        else "N/A"
-    )
-    p4.metric(
-        "Movement Value",
-        f"{player['movement']:,.0f}"
-        if pd.notna(player["movement"])
-        else "N/A"
-    )
-    st.write(f"**Country:** {player['country_display']}")
-    st.write(
-        f"**Abbreviation:** "
-        f"{player['abbreviation'] if pd.notna(player['abbreviation']) else 'N/A'}"
-    )
+    # First KPI Row
+    p1, p2, p3 = st.columns(3, gap="large")
+    with p1:
+        render_kpi(
+            "Player Rank",
+            f"#{player['rank']:,.0f}",
+            "Current ranking position"
+        )
+    with p2:
+        render_kpi(
+            "Ranking Points",
+            f"{player['points']:,.0f}",
+            "Total ranking points"
+        )
+    with p3:
+        render_kpi(
+            "Competitions Played",
+            f"{player['competitions_played']:,.0f}"
+            if pd.notna(player["competitions_played"])
+            else "N/A",
+            "Total competitions"
+        )
+    # Second KPI Row
+    p4, p5, p6 = st.columns(3, gap="large")
+    with p4:
+        render_kpi(
+            "Movement Value",
+            f"{player['movement']:,.0f}"
+            if pd.notna(player["movement"])
+            else "N/A",
+            "Ranking movement"
+        )
+    with p5:
+        render_kpi(
+            "Country",
+            str(player["country_display"]),
+            "Player's country"
+        )
+    with p6:
+        render_kpi(
+            "Abbreviation",
+            str(player["abbreviation"])
+            if pd.notna(player["abbreviation"])
+            else "N/A",
+            "Player abbreviation"
+        )
 
     # =================================================
     # CSV EXPORT
