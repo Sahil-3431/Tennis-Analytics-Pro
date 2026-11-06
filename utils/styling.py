@@ -569,21 +569,68 @@ def apply_theme():
             box-shadow: 0 0 0 1px {accent} !important;
         }}
 
-        /* DROPDOWN OPTIONS */
+        /* =========================================
+        DROPDOWN MENU - DEPLOYMENT FIX
+        ========================================= */
 
-        [data-baseweb="popover"],
+        [data-baseweb="popover"] > div,
+        [data-baseweb="popover"] [data-baseweb="menu"],
         [data-baseweb="menu"],
-        [role="listbox"] {{
+        ul[role="listbox"] {{
+            background: {card} !important;
             background-color: {card} !important;
+            border: 1px solid {border} !important;
+            color: {text} !important;
         }}
-        [role="option"] {{
+
+        /* Dropdown option items */
+
+        [data-baseweb="popover"] [role="option"],
+        [data-baseweb="menu"] [role="option"],
+        ul[role="listbox"] li {{
+            background: {card} !important;
             background-color: {card} !important;
             color: {text} !important;
         }}
-        [role="option"]:hover,
-        [role="option"][aria-selected="true"] {{
+
+        /* Hover and selected options */
+
+        [data-baseweb="popover"] [role="option"]:hover,
+        [data-baseweb="menu"] [role="option"]:hover,
+        ul[role="listbox"] li:hover,
+        [data-baseweb="popover"] [role="option"][aria-selected="true"],
+        [data-baseweb="menu"] [role="option"][aria-selected="true"] {{
+            background: {input_bg} !important;
             background-color: {input_bg} !important;
             color: {text} !important;
+        }}
+
+        /* Dropdown option text */
+
+        [data-baseweb="popover"] [role="option"] *,
+        [data-baseweb="menu"] [role="option"] *,
+        ul[role="listbox"] li * {{
+            color: {text} !important;
+            -webkit-text-fill-color: {text} !important;
+        }}
+
+        /* Dropdown search input */
+
+        [data-baseweb="popover"] input {{
+            background-color: {input_bg} !important;
+            color: {text} !important;
+            -webkit-text-fill-color: {text} !important;
+        }}
+
+        /* Dropdown scrollbar */
+
+        [data-baseweb="popover"] ::-webkit-scrollbar {{
+            width: 7px;
+        }}
+
+        [data-baseweb="popover"] ::-webkit-scrollbar-thumb {{
+            background: {border};
+            border-radius: 10px;
         }}
 
         /* =========================================
