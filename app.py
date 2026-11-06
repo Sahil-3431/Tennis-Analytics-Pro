@@ -9,6 +9,7 @@ from dashboard import insights
 from dashboard import sql_analytics
 from dashboard import performance_analysis
 from dashboard import data_quality
+from dashboard import venue_complex
 
 # ==========================================
 # PAGE CONFIGURATION
@@ -63,6 +64,8 @@ elif page == "SQL Analytics":
     sql_analytics.show()
 elif page == "Insights & Recommendations":
     insights.show()
+elif page == "Venue & Complex Analytics":
+    venue_complex.show()
 
 # ==========================================
 # FOOTER

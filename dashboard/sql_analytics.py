@@ -871,6 +871,159 @@ def get_query_library():
                 ORDER BY rank;
             """,
         },
+        
+        # -------------------------------------------------
+        # 9. VENUES & COMPLEXES – 10 QUERIES
+        # -------------------------------------------------
+
+        "Venues & Complexes": {
+            "40. Venue and Complex Database Overview": """
+                SELECT
+                    (SELECT COUNT(*) FROM Venues)
+                        AS Total_Venues,
+                    (SELECT COUNT(*) FROM Complexes)
+                        AS Total_Complexes,
+                    (SELECT COUNT(DISTINCT country_name)
+                     FROM Venues)
+                        AS Total_Countries,
+                    (SELECT COUNT(DISTINCT city_name || ', ' || country_name)
+                     FROM Venues)
+                        AS Total_Cities;
+            """,
+            "41. Country-wise Venue Distribution": """
+                SELECT
+                    country_name AS Country,
+                    country_code AS Country_Code,
+                    COUNT(*) AS Total_Venues,
+                    COUNT(DISTINCT city_name) AS Total_Cities,
+                    COUNT(DISTINCT complex_id) AS Total_Complexes
+                FROM Venues
+                GROUP BY country_name, country_code
+                ORDER BY Total_Venues DESC;
+            """,
+            "42. Top 20 Cities by Venue Count": """
+                SELECT
+                    city_name AS City,
+                    country_name AS Country,
+                    COUNT(*) AS Total_Venues,
+                    COUNT(DISTINCT complex_id) AS Total_Complexes
+                FROM Venues
+                GROUP BY city_name, country_name
+                ORDER BY Total_Venues DESC
+                LIMIT 20;
+            """,
+            "43. Complex-wise Venue Distribution": """
+                SELECT
+                    c.complex_id AS Complex_ID,
+                    c.complex_name AS Complex_Name,
+                    COUNT(v.venue_id) AS Total_Venues,
+                    COUNT(DISTINCT v.city_name) AS Total_Cities,
+                    COUNT(DISTINCT v.country_name) AS Total_Countries
+                FROM Complexes c
+                LEFT JOIN Venues v
+                    ON c.complex_id = v.complex_id
+                GROUP BY c.complex_id, c.complex_name
+                ORDER BY Total_Venues DESC;
+            """,
+            "44. Country-wise Complex Count": """
+                SELECT
+                    country_name AS Country,
+                    COUNT(DISTINCT complex_id) AS Total_Complexes,
+                    COUNT(venue_id) AS Total_Venues
+                FROM Venues
+                GROUP BY country_name
+                ORDER BY Total_Complexes DESC;
+            """,
+            "45. Timezone-wise Venue Distribution": """
+                SELECT
+                    timezone AS Timezone,
+                    COUNT(*) AS Total_Venues,
+                    COUNT(DISTINCT country_name) AS Total_Countries,
+                    COUNT(DISTINCT city_name) AS Total_Cities
+                FROM Venues
+                GROUP BY timezone
+                ORDER BY Total_Venues DESC;
+            """,
+            "46. Complete Venue and Complex Details": """
+                SELECT
+                    v.venue_id AS Venue_ID,
+                    v.venue_name AS Venue_Name,
+                    v.city_name AS City,
+                    v.country_name AS Country,
+                    v.country_code AS Country_Code,
+                    v.timezone AS Timezone,
+                    c.complex_id AS Complex_ID,
+                    c.complex_name AS Complex_Name
+                FROM Venues v
+                LEFT JOIN Complexes c
+                    ON v.complex_id = c.complex_id
+                ORDER BY v.country_name, v.city_name, v.venue_name;
+            """,
+            "47. Complexes with Multiple Venues": """
+                SELECT
+                    c.complex_id AS Complex_ID,
+                    c.complex_name AS Complex_Name,
+                    COUNT(v.venue_id) AS Total_Venues
+                FROM Complexes c
+                JOIN Venues v
+                    ON c.complex_id = v.complex_id
+                GROUP BY c.complex_id, c.complex_name
+                HAVING COUNT(v.venue_id) > 1
+                ORDER BY Total_Venues DESC;
+            """,
+            "48. Country-wise Venue and City Summary": """
+                SELECT
+                    country_name AS Country,
+                    COUNT(DISTINCT venue_id) AS Total_Venues,
+                    COUNT(DISTINCT city_name) AS Total_Cities,
+                    COUNT(DISTINCT complex_id) AS Total_Complexes,
+                    COUNT(DISTINCT timezone) AS Total_Timezones
+                FROM Venues
+                GROUP BY country_name
+                ORDER BY Total_Venues DESC;
+            """,
+            "49. Venue and Complex Data Quality Check": """
+                SELECT
+                    (SELECT COUNT(*)
+                     FROM Venues)
+                        AS Total_Venues,
+                    (SELECT COUNT(*)
+                     FROM Venues
+                     WHERE venue_id IS NULL
+                        OR TRIM(venue_id) = '')
+                        AS Missing_Venue_ID,
+                    (SELECT COUNT(*)
+                     FROM Venues
+                     WHERE complex_id IS NULL
+                        OR TRIM(complex_id) = '')
+                        AS Missing_Complex_ID,
+                    (SELECT COUNT(*)
+                     FROM Venues v
+                     LEFT JOIN Complexes c
+                        ON v.complex_id = c.complex_id
+                     WHERE c.complex_id IS NULL)
+                        AS Unmatched_Complexes,
+                    (SELECT COUNT(*)
+                     FROM Complexes)
+                        AS Total_Complexes,
+                    (SELECT COUNT(*)
+                     FROM (
+                        SELECT venue_id
+                        FROM Venues
+                        GROUP BY venue_id
+                        HAVING COUNT(*) > 1
+                     ))
+                        AS Duplicate_Venue_IDs,
+                    (SELECT COUNT(*)
+                     FROM (
+                        SELECT complex_id
+                        FROM Complexes
+                        GROUP BY complex_id
+                        HAVING COUNT(*) > 1
+                     ))
+                        AS Duplicate_Complex_IDs;
+            """,
+        },
     }
 
 # =========================================================
@@ -1125,7 +1278,7 @@ def render_query_result(result_df, key_prefix):
 def render_query_library():
     render_section_header(
         "Ready-made SQL Query Library",
-        "Explore 39 predefined SQL analyses across eight categories.",
+        "Explore 49 predefined SQL analyses across eight categories.",
         "📚"
     )
     query_library = get_query_library()
@@ -1262,6 +1415,25 @@ def render_custom_sql_editor():
             "ranking_snapshot_id, ranking_type_id, ranking_name, "
             "year, week, gender, generated_at",
             language="text"
+        )
+
+        st.markdown("**Venues**")
+        st.code(
+            "venue_id, venue_name, city_name, country_name, "
+            "country_code, timezone, complex_id",
+            language="text"
+        )
+
+        st.markdown("**Complexes**")
+        st.code(
+            "complex_id, complex_name",
+            language="text"
+        )
+
+        st.markdown("**Venue & Complex Relationship**")
+        st.code(
+            "Venues.complex_id = Complexes.complex_id",
+            language="sql"
         )
 
         st.markdown("**Table Relationships**")
@@ -1444,16 +1616,12 @@ def render_sql_learning():
 # =========================================================
 
 def show():
-
     st.title("🗄️ Advanced SQL Analytics")
-
     st.caption(
-        "Explore tennis ranking data with 39 predefined SQL analyses "
+        "Explore tennis ranking data with 49 predefined SQL analyses "
         "or write and execute your own read-only SQL queries."
     )
-
     st.divider()
-
     tab1, tab2, tab3, tab4 = st.tabs(
         [
             "📚 Query Library",

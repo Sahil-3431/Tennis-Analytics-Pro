@@ -12,6 +12,7 @@ PAGES = {
     "Player Rankings": "🏆",
     "Performance Analysis": "📈",
     "Competitor Explorer": "🔍",
+    "Venue & Complex Analytics":"🏟️",
     "Country Analytics": "🌍",
     "SQL Analytics": "🗄️",
     "Insights & Recommendations": "💡"
